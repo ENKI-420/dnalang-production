@@ -1,0 +1,146 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* IBM Carbon Design System color palette */
+:root {
+  /* IBM Gray Scale */
+  --ibm-gray-10: #f4f4f4;
+  --ibm-gray-20: #e0e0e0;
+  --ibm-gray-30: #c6c6c6;
+  --ibm-gray-40: #a8a8a8;
+  --ibm-gray-50: #8d8d8d;
+  --ibm-gray-60: #6f6f6f;
+  --ibm-gray-70: #525252;
+  --ibm-gray-80: #393939;
+  --ibm-gray-90: #262626;
+  --ibm-gray-100: #161616;
+  
+  /* IBM Blue */
+  --ibm-blue-10: #edf5ff;
+  --ibm-blue-20: #d0e2ff;
+  --ibm-blue-30: #a6c8ff;
+  --ibm-blue-40: #78a9ff;
+  --ibm-blue-50: #4589ff;
+  --ibm-blue-60: #0f62fe;
+  --ibm-blue-70: #0043ce;
+  --ibm-blue-80: #002d9c;
+  
+  --background: var(--ibm-gray-100);
+  --foreground: var(--ibm-gray-10);
+  --card: var(--ibm-gray-90);
+  --card-foreground: var(--ibm-gray-10);
+  --popover: var(--ibm-gray-90);
+  --popover-foreground: var(--ibm-gray-10);
+  --primary: var(--ibm-blue-60);
+  --primary-foreground: #ffffff;
+  --secondary: var(--ibm-gray-80);
+  --secondary-foreground: var(--ibm-gray-10);
+  --muted: var(--ibm-gray-80);
+  --muted-foreground: var(--ibm-gray-50);
+  --accent: var(--ibm-blue-70);
+  --accent-foreground: var(--ibm-gray-10);
+  --destructive: #da1e28;
+  --destructive-foreground: #ffffff;
+  --border: var(--ibm-gray-80);
+  --input: var(--ibm-gray-90);
+  --ring: var(--ibm-blue-60);
+  --radius: 0.25rem;
+}
+
+@theme inline {
+  --font-sans: 'IBM Plex Sans', 'Geist', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Geist Mono', 'Courier New', monospace;
+  
+  /* IBM color tokens */
+  --color-ibm-gray-10: var(--ibm-gray-10);
+  --color-ibm-gray-20: var(--ibm-gray-20);
+  --color-ibm-gray-30: var(--ibm-gray-30);
+  --color-ibm-gray-40: var(--ibm-gray-40);
+  --color-ibm-gray-50: var(--ibm-gray-50);
+  --color-ibm-gray-60: var(--ibm-gray-60);
+  --color-ibm-gray-70: var(--ibm-gray-70);
+  --color-ibm-gray-80: var(--ibm-gray-80);
+  --color-ibm-gray-90: var(--ibm-gray-90);
+  --color-ibm-gray-100: var(--ibm-gray-100);
+  
+  --color-ibm-blue-10: var(--ibm-blue-10);
+  --color-ibm-blue-20: var(--ibm-blue-20);
+  --color-ibm-blue-30: var(--ibm-blue-30);
+  --color-ibm-blue-40: var(--ibm-blue-40);
+  --color-ibm-blue-50: var(--ibm-blue-50);
+  --color-ibm-blue-60: var(--ibm-blue-60);
+  --color-ibm-blue-70: var(--ibm-blue-70);
+  --color-ibm-blue-80: var(--ibm-blue-80);
+  
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+  
+  --animate-spin-slow: spin 3s linear infinite;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: var(--animate-spin-slow);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ibm-gray-90);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ibm-gray-70);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ibm-gray-60);
+}
