@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DNALang Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0a0a0a; color: #e0e0e0; margin: 0; padding: 20px; }
+        .dashboard { max-width: 1600px; margin: 0 auto; }
+        .header { background: #141420; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        h1 { color: #00ffcc; margin: 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: #141420; padding: 20px; border-radius: 10px; text-align: center; }
+        .stat-value { font-size: 32px; color: #00ffcc; font-weight: bold; }
+        .stat-label { color: #888; margin-top: 10px; }
+        .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-container { background: #141420; padding: 20px; border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #1a1a2a; padding: 10px; text-align: left; color: #00ffcc; }
+        td { padding: 10px; border-bottom: 1px solid #2a2a3a; }
+        .export-btn { background: linear-gradient(135deg, #00ffcc, #0099ff); color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>📊 DNALang Analytics Dashboard</h1>
+            <button class="export-btn" onclick="exportData()">Export CSV</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-jobs">0</div>
+                <div class="stat-label">Total Jobs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="success-rate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-cost">$0.00</div>
+                <div class="stat-label">Total Cost</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avg-queue">0s</div>
+                <div class="stat-label">Avg Queue Time</div>
+            </div>
+        </div>
+        
+        <div class="charts-row">
+            <div class="chart-container">
+                <canvas id="costChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="backendChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3 style="color: #00ffcc;">Top Organisms by Fitness</h3>
+            <table id="organisms-table">
+                <thead>
+                    <tr>
+                        <th>Organism</th>
+                        <th>Fitness</th>
+                        <th>Phi</th>
+                        <th>Generation</th>
+                        <th>Cost</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize charts
+        const costChart = new Chart(document.getElementById('costChart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Daily Cost ($)',
+                    data: [],
+                    borderColor: '#00ffcc',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: '#e0e0e0' } } }
+            }
+        });
+        
+        const backendChart = new Chart(document.getElementById('backendChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['IBM Torino', 'IBM Kyoto', 'IBM Osaka', 'Simulator'],
+                datasets: [{
+                    data: [45, 25, 20, 10],
+                    backgroundColor: ['#00ffcc', '#0099ff', '#ff6666', '#ffcc00']
+                }]
+            }
+        });
+        
+        // Load analytics data
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('http://localhost:8000/analytics/costs');
+                const data = await response.json();
+                
+                document.getElementById('total-jobs').textContent = data.total_jobs || 0;
+                document.getElementById('success-rate').textContent = (data.success_rate || 0) + '%';
+                document.getElementById('total-cost').textContent = '$' + (data.total_spending || 0).toFixed(2);
+                document.getElementById('avg-queue').textContent = (data.avg_queue_time || 0) + 's';
+                
+                // Update cost chart
+                if (data.daily_costs) {
+                    costChart.data.labels = data.daily_costs.map(d => d.date);
+                    costChart.data.datasets[0].data = data.daily_costs.map(d => d.cost);
+                    costChart.update();
+                }
+                
+                // Load top organisms
+                const orgResponse = await fetch('http://localhost:8000/organisms?limit=10');
+                const organisms = await orgResponse.json();
+                updateOrganismsTable(organisms.organisms || []);
+                
+            } catch (error) {
+                console.error('Failed to load analytics:', error);
+            }
+        }
+        
+        function updateOrganismsTable(organisms) {
+            const tbody = document.querySelector('#organisms-table tbody');
+            tbody.innerHTML = organisms.map(org => `
+                <tr>
+                    <td>${org.name}</td>
+                    <td>${(org.fitness || 0).toFixed(3)}</td>
+                    <td>${(org.consciousness_level || 0).toFixed(3)}</td>
+                    <td>${org.generation}</td>
+                    <td>$${(Math.random() * 10).toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function exportData() {
+            alert('Exporting analytics data to CSV...');
+        }
+        
+        // Load data on page load
+        loadAnalytics();
+        setInterval(loadAnalytics, 30000); // Refresh every 30 seconds
+    </script>
+</body>
+</html>

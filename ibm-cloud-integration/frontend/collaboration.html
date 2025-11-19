@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DNALang Team Collaboration</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0a0a0a; color: #e0e0e0; margin: 0; }
+        .container { display: grid; grid-template-columns: 250px 1fr 300px; height: 100vh; }
+        .sidebar { background: #141420; padding: 20px; border-right: 1px solid #2a2a3a; }
+        .main { padding: 20px; overflow-y: auto; }
+        .chat { background: #141420; padding: 20px; border-left: 1px solid #2a2a3a; display: flex; flex-direction: column; }
+        h2 { color: #00ffcc; margin: 0 0 20px 0; }
+        .team-member { padding: 10px; margin: 5px 0; background: #1a1a2a; border-radius: 5px; cursor: pointer; }
+        .team-member:hover { background: #2a2a3a; }
+        .organism-card { background: #141420; padding: 20px; border-radius: 10px; margin: 10px 0; border: 1px solid #2a2a3a; }
+        .organism-name { color: #00ffcc; font-size: 18px; margin-bottom: 10px; }
+        .organism-meta { color: #888; font-size: 12px; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 10px; background: #0a0a0a; border-radius: 5px; margin-bottom: 10px; }
+        .message { margin: 10px 0; padding: 10px; background: #1a1a2a; border-radius: 5px; }
+        .message-author { color: #00ffcc; font-size: 12px; margin-bottom: 5px; }
+        .chat-input { display: flex; gap: 10px; }
+        .chat-input input { flex: 1; background: #1a1a2a; border: 1px solid #2a2a3a; color: #e0e0e0; padding: 10px; border-radius: 5px; }
+        button { background: linear-gradient(135deg, #00ffcc, #0099ff); color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .role-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; margin-left: 10px; }
+        .admin { background: #ff6666; }
+        .developer { background: #0099ff; }
+        .researcher { background: #00ffcc; color: #0a0a0a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Team Members</h2>
+            <div id="team-members">
+                <div class="team-member">
+                    John Doe <span class="role-badge admin">Admin</span>
+                </div>
+                <div class="team-member">
+                    Jane Smith <span class="role-badge developer">Developer</span>
+                </div>
+                <div class="team-member">
+                    Bob Wilson <span class="role-badge researcher">Researcher</span>
+                </div>
+            </div>
+            
+            <h2 style="margin-top: 30px;">Quick Actions</h2>
+            <button onclick="inviteMember()" style="width: 100%; margin: 5px 0;">Invite Member</button>
+            <button onclick="createTeam()" style="width: 100%; margin: 5px 0;">Create Team</button>
+        </div>
+        
+        <div class="main">
+            <h2>Shared Organisms</h2>
+            <div id="shared-organisms">
+                <div class="organism-card">
+                    <div class="organism-name">QuantumOptimizer v2.1</div>
+                    <div class="organism-meta">
+                        Shared by John Doe • Generation 15 • Fitness: 0.834<br>
+                        Last updated: 2 hours ago
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button onclick="viewOrganism('1')">View</button>
+                        <button onclick="forkOrganism('1')">Fork</button>
+                        <button onclick="evolveOrganism('1')">Evolve</button>
+                    </div>
+                </div>
+                
+                <div class="organism-card">
+                    <div class="organism-name">NeuralQuantumBridge</div>
+                    <div class="organism-meta">
+                        Shared by Jane Smith • Generation 8 • Fitness: 0.756<br>
+                        Last updated: 5 hours ago
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button onclick="viewOrganism('2')">View</button>
+                        <button onclick="forkOrganism('2')">Fork</button>
+                        <button onclick="evolveOrganism('2')">Evolve</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat">
+            <h2>Team Chat</h2>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message">
+                    <div class="message-author">John Doe</div>
+                    <div>Just achieved 0.834 fitness on the QuantumOptimizer!</div>
+                </div>
+                <div class="message">
+                    <div class="message-author">Jane Smith</div>
+                    <div>Nice! What mutations did you apply?</div>
+                </div>
+                <div class="message">
+                    <div class="message-author">Bob Wilson</div>
+                    <div>I'm seeing interesting patterns in the Lambda-Phi correlation.</div>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="message-input" placeholder="Type a message..." onkeypress="handleChatKeypress(event)">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function viewOrganism(id) {
+            alert('Opening organism viewer for ID: ' + id);
+        }
+        
+        function forkOrganism(id) {
+            alert('Creating fork of organism ID: ' + id);
+        }
+        
+        function evolveOrganism(id) {
+            alert('Starting evolution for organism ID: ' + id);
+        }
+        
+        function inviteMember() {
+            const email = prompt('Enter email address to invite:');
+            if (email) {
+                alert('Invitation sent to: ' + email);
+            }
+        }
+        
+        function createTeam() {
+            const name = prompt('Enter team name:');
+            if (name) {
+                alert('Team "' + name + '" created successfully!');
+            }
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            if (message) {
+                const messagesDiv = document.getElementById('chat-messages');
+                messagesDiv.innerHTML += `
+                    <div class="message">
+                        <div class="message-author">You</div>
+                        <div>${message}</div>
+                    </div>
+                `;
+                input.value = '';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+        
+        function handleChatKeypress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // Simulate real-time updates
+        setInterval(() => {
+            // In production, this would use WebSocket for real-time updates
+        }, 5000);
+    </script>
+</body>
+</html>

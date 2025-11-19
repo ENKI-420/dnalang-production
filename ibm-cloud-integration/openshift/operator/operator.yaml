@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dnalang-operator
+  namespace: dnalang-quantum
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dnalang-operator
+  template:
+    metadata:
+      labels:
+        app: dnalang-operator
+    spec:
+      serviceAccountName: dnalang-operator
+      containers:
+      - name: operator
+        image: dnalang/operator:latest
+        env:
+        - name: IBM_QUANTUM_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ibm-quantum-credentials
+              key: token
+        - name: LAMBDA_PHI
+          value: "2.176435e-8"
+        - name: OPERATOR_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

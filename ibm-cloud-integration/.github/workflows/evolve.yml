@@ -1,0 +1,78 @@
+name: Auto-Evolution Pipeline
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+env:
+  IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
+  LAMBDA_PHI: 2.176435e-8
+
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r backend/requirements.txt
+    
+    - name: Run fitness evaluation
+      run: |
+        python -c "
+        import json
+        from backend.organisms import OrganismEvaluator, OrganismRegistry
+        from backend.quantum import QiskitClient
+        
+        registry = OrganismRegistry()
+        evaluator = OrganismEvaluator()
+        client = QiskitClient()
+        
+        # Load organisms
+        organisms = registry.get_top_organisms(limit=5)
+        
+        for org in organisms:
+            # Execute on quantum hardware
+            circuit = client.create_variational_circuit(5)
+            result = client.execute_circuit(circuit, shots=1024)
+            
+            # Evaluate fitness
+            evaluation = evaluator.evaluate_fitness(
+                org.id, result, org.generation
+            )
+            
+            print(f'{org.name}: Fitness={evaluation[\"total_fitness\"]:.3f}')
+            
+            # Evolve if needed
+            if evaluation['evolution_potential'] > 0.5:
+                mutations = {
+                    'gate_substitution': {'H': 'RY'},
+                    'parameter_shift': {'factor': 1.1}
+                }
+                evolved_id = registry.evolve_organism(org.id, mutations)
+                print(f'  Evolved to generation {org.generation + 1}')
+        "
+    
+    - name: Commit evolved organisms
+      run: |
+        git config --global user.name 'Evolution Bot'
+        git config --global user.email 'evolution@dnalang.io'
+        
+        if [ -n "$(git status --porcelain)" ]; then
+          git add -A
+          git commit -m "Auto-evolution: Generation $(date +%s)"
+          git push
+        fi
+    
+    - name: Update metrics
+      run: |
+        echo "Evolution complete at $(date)"

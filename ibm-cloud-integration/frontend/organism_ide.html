@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DNALang Organism IDE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; }
+        .container { display: grid; grid-template-columns: 1fr 300px; height: 100vh; }
+        #editor { height: 100%; }
+        .sidebar { background: #141420; padding: 20px; border-left: 1px solid #2a2a3a; overflow-y: auto; }
+        .validation { padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 12px; }
+        .error { background: rgba(255,0,0,0.1); border: 1px solid #ff0066; color: #ff6666; }
+        .warning { background: rgba(255,204,0,0.1); border: 1px solid #ffcc00; color: #ffcc00; }
+        .success { background: rgba(0,255,0,0.1); border: 1px solid #00ff66; color: #00ff66; }
+        button { background: linear-gradient(135deg, #00ffcc, #0099ff); color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; }
+        h3 { color: #00ffcc; margin: 15px 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="editor"></div>
+        <div class="sidebar">
+            <h3>DNALang Organism IDE</h3>
+            <button onclick="validateDNA()">Validate</button>
+            <button onclick="compileDNA()">Compile</button>
+            <button onclick="executeDNA()">Execute</button>
+            <button onclick="loadTemplate()">Load Template</button>
+            <div id="validation-results"></div>
+            <h3>Organism Properties</h3>
+            <div id="properties"></div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <script>
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+        
+        require(['vs/editor/editor.main'], function() {
+            // Register DNALang language
+            monaco.languages.register({ id: 'dnalang' });
+            
+            // Set DNALang tokens
+            monaco.languages.setMonarchTokensProvider('dnalang', {
+                keywords: ['ORGANISM', 'DNA', 'GENOME', 'GENE', 'TRAITS', 'MUTATIONS', 'PHENOME', 'QUANTUM'],
+                tokenizer: {
+                    root: [
+                        [/\b(ORGANISM|DNA|GENOME|GENE|TRAITS|MUTATIONS|PHENOME|QUANTUM)\b/, 'keyword'],
+                        [/\b(true|false)\b/, 'boolean'],
+                        [/\b\d+\.?\d*([eE][-+]?\d+)?\b/, 'number'],
+                        [/".*?"/, 'string'],
+                        [/#.*$/, 'comment'],
+                        [/:/, 'delimiter'],
+                        [/{|}/, 'bracket']
+                    ]
+                }
+            });
+            
+            // Create editor
+            window.editor = monaco.editor.create(document.getElementById('editor'), {
+                value: `ORGANISM QuantumEvolver {
+  DNA {
+    domain: "quantum_optimization"
+    version: "1.0.0"
+    quantum_enabled: true
+    lambda_phi: 2.176435e-8
+  }
+  
+  GENOME {
+    GENE optimizer {
+      purpose: "Optimize quantum circuits"
+      
+      TRAITS {
+        algorithm: "VQE"
+        learning_rate: 0.01
+      }
+      
+      MUTATIONS {
+        adaptive_learning {
+          trigger: "fitness < 0.5"
+          action: "increase learning_rate"
+        }
+      }
+    }
+  }
+  
+  QUANTUM {
+    backend: "ibm_torino"
+    optimization_level: 3
+  }
+}`,
+                language: 'dnalang',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                fontSize: 14,
+                minimap: { enabled: false }
+            });
+        });
+        
+        async function validateDNA() {
+            const code = window.editor.getValue();
+            const response = await fetch('http://localhost:8000/ide/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dna_code: code })
+            });
+            const result = await response.json();
+            
+            const resultsDiv = document.getElementById('validation-results');
+            resultsDiv.innerHTML = '';
+            
+            if (result.valid) {
+                resultsDiv.innerHTML = '<div class="validation success">✓ Valid DNALang syntax</div>';
+            } else {
+                result.errors.forEach(err => {
+                    resultsDiv.innerHTML += `<div class="validation error">Line ${err.line}: ${err.message}</div>`;
+                });
+            }
+            
+            result.warnings.forEach(warn => {
+                resultsDiv.innerHTML += `<div class="validation warning">Line ${warn.line}: ${warn.message}</div>`;
+            });
+        }
+        
+        async function compileDNA() {
+            alert('Compiling organism to quantum circuit...');
+            // Implementation would call backend API
+        }
+        
+        async function executeDNA() {
+            alert('Executing on IBM Quantum hardware...');
+            // Implementation would call backend API
+        }
+        
+        async function loadTemplate() {
+            const response = await fetch('http://localhost:8000/ide/template/advanced');
+            const data = await response.json();
+            window.editor.setValue(data.template);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: organisms.dnalang.io
+spec:
+  group: dnalang.io
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              name:
+                type: string
+              dnaCode:
+                type: string
+              backend:
+                type: string
+                enum: ["ibm_torino", "ibm_kyoto", "ibm_osaka", "aer_simulator"]
+              replicas:
+                type: integer
+                minimum: 1
+                maximum: 10
+              autoscale:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                  minReplicas:
+                    type: integer
+                  maxReplicas:
+                    type: integer
+                  targetPhi:
+                    type: number
+                  targetLambda:
+                    type: number
+          status:
+            type: object
+            properties:
+              phase:
+                type: string
+              fitness:
+                type: number
+              phi:
+                type: number
+              lambda:
+                type: number
+              gamma:
+                type: number
+              generation:
+                type: integer
+              lastExecuted:
+                type: string
+  scope: Namespaced
+  names:
+    plural: organisms
+    singular: organism
+    kind: Organism

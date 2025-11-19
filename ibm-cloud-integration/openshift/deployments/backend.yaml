@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dnalang-backend
+  namespace: dnalang-quantum
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dnalang-backend
+  template:
+    metadata:
+      labels:
+        app: dnalang-backend
+    spec:
+      containers:
+      - name: backend
+        image: dnalang/backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: IBM_QUANTUM_TOKEN
+          value: "4u2Up-UXZ6midCxr_Vo5m4rgVYNSJ2LPRAW8qu5hYG6X"
+        - name: LAMBDA_PHI
+          value: "2.176435e-8"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dnalang-backend
+  namespace: dnalang-quantum
+spec:
+  selector:
+    app: dnalang-backend
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP

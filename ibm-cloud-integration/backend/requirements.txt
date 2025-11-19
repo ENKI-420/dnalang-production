@@ -1,0 +1,48 @@
+# IBM Quantum & Cloud Dependencies
+qiskit>=1.3.0
+qiskit-ibm-runtime>=0.31.0
+qiskit-aer>=0.15.1
+
+# FastAPI & WebSockets
+fastapi>=0.115.0
+uvicorn[standard]>=0.31.0
+websockets>=13.0
+python-multipart>=0.0.12
+
+# IBM Cloud Services
+ibm-cos-sdk>=2.13.0
+ibm-cloud-sdk-core>=3.22.0
+ibm-platform-services>=0.58.0
+
+# Scientific Computing
+numpy>=1.26.0
+scipy>=1.14.0
+pandas>=2.2.0
+
+# Data Visualization & Analytics
+matplotlib>=3.9.0
+plotly>=5.24.0
+
+# Authentication & Security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-dotenv>=1.0.1
+
+# Database & Caching
+redis>=5.1.0
+pymongo>=4.8.0
+
+# Kubernetes & OpenShift
+kubernetes>=31.0.0
+openshift>=0.13.2
+
+# Monitoring & Telemetry
+prometheus-client>=0.21.0
+opentelemetry-api>=1.28.0
+opentelemetry-sdk>=1.28.0
+
+# Utilities
+httpx>=0.27.0
+pydantic>=2.9.0
+pyyaml>=6.0.2
+aiofiles>=24.1.0
