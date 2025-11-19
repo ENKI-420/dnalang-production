@@ -104,6 +104,9 @@ export default function HomePage() {
               <Link href="/workloads" className="text-sm hover:text-[#00FFD1] transition-colors">
                 Workloads
               </Link>
+              <Link href="/benchmarks" className="text-sm hover:text-[#00FFD1] transition-colors">
+                Benchmarks
+              </Link>
               <Link href="#technology" className="text-sm hover:text-[#00FFD1] transition-colors">
                 Technology
               </Link>
