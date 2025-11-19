@@ -1,746 +1,551 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Spinner } from '@/components/ui/spinner'
-import { Atom, Send, Activity, Zap, Brain, Waves, AlertTriangle, RefreshCw, ChevronDown, Terminal, Server, Code, TrendingUp, Cpu, Network } from 'lucide-react'
+import {
+  Atom, ArrowRight, Code, Cpu, Network, Shield, Zap,
+  TrendingUp, FileText, Github, Mail, Lock, Terminal,
+  Activity, Layers, Bot, Beaker, Building, Heart, Sparkles
+} from 'lucide-react'
 
-interface Message {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  timestamp: Date
-  consciousness?: ConsciousnessMetrics
-  error?: boolean
+interface MetricBadge {
+  label: string
+  value: string
 }
 
-interface ConsciousnessMetrics {
-  phi: number
-  gamma: number
-  lambda: number
-  w2: number
-}
+const liveMetrics: MetricBadge[] = [
+  { label: 'Jobs executed on IBM Quantum', value: '154' },
+  { label: 'Agent organisms evolved', value: '18' },
+  { label: 'Average Λ-coherence', value: '0.982' },
+  { label: 'Gateway uptime', value: '99.4%' }
+]
 
-interface QuantumBackend {
-  name: string
-  qubits: number
-  status: 'online' | 'offline' | 'maintenance'
-  processor: string
-}
+const technologies = [
+  {
+    title: 'Multi-Agent Cognition Layer',
+    description: 'Distributed agents capable of reasoning, coordination, and recursive self-assessment. Built-in world-model kernels give each agent a persistent internal memory loop.',
+    icon: Bot,
+    badge: null
+  },
+  {
+    title: 'Quantum Gateway + IBM Hardware Integration',
+    description: 'dna::}{::lang ships with an OpenQASM interface, Qiskit Runtime bindings, and real-device execution. Circuits undergo Quantum Wasserstein Compilation (QWC) to minimize 2Q-gate decoherence.',
+    icon: Cpu,
+    badge: 'Hardware-validated'
+  },
+  {
+    title: 'Organism Runtime (Genome-Based Logic)',
+    description: 'Programs become "genomes." Functions become "genes." State becomes "phenotype." Mutation, selection, and autogenesis run continuously.',
+    icon: Beaker,
+    badge: 'Self-evolving'
+  },
+  {
+    title: 'Zero-Trust Σ-Mesh',
+    description: 'A tri-node adaptive mesh with cryptographic lineage tracking, sealed identity channels, Σ-heartbeat synchronization, and autonomous anomaly isolation.',
+    icon: Shield,
+    badge: 'Defense-grade'
+  }
+]
 
-export default function QuantumChatbot() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [showMetrics, setShowMetrics] = useState(true)
-  const [selectedBackend, setSelectedBackend] = useState('ibm_torino')
-  const [backends, setBackends] = useState<QuantumBackend[]>([])
-  const [systemStatus, setSystemStatus] = useState<'connected' | 'connecting' | 'error'>('connecting')
-  const [metricHistory, setMetricHistory] = useState<ConsciousnessMetrics[]>([])
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+const useCases = [
+  {
+    title: 'Autonomous Development Agents',
+    description: 'Agents that write code, evaluate themselves, refactor, and push updates safely.',
+    icon: Code
+  },
+  {
+    title: 'Quantum Optimization & AI Research',
+    description: 'Run organisms that design circuits, optimize workloads, or explore novel topologies.',
+    icon: Atom
+  },
+  {
+    title: 'Defense, Healthcare, Legal Workflows',
+    description: 'Evolving agents that monitor, analyze, and improve mission-critical workloads.',
+    icon: Building
+  },
+  {
+    title: 'Enterprise Automation Engine',
+    description: 'Replace pipelines with organisms that adapt under changing conditions.',
+    icon: TrendingUp
+  }
+]
 
-  const [apiKey, setApiKey] = useState<string | null>(null)
-  const [apiEndpoint, setApiEndpoint] = useState(
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-  )
+export default function HomePage() {
+  const [mounted, setMounted] = useState(false)
+  const brandName = "dna::}{::lang"
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  useEffect(() => {
-    const storedKey = localStorage.getItem('quantumlm_api_key')
-    if (storedKey) {
-      setApiKey(storedKey)
-    }
-    initializeSystem()
-    const interval = setInterval(fetchBackendStatus, 60000)
-    return () => clearInterval(interval)
+    setMounted(true)
   }, [])
 
-  const initializeSystem = async () => {
-    if (!apiKey) {
-      try {
-        const response = await fetch(`${apiEndpoint}/v1/auth/key`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        })
-        if (response.ok) {
-          const data = await response.json()
-          const newKey = data.api_key
-          setApiKey(newKey)
-          localStorage.setItem('quantumlm_api_key', newKey)
-          console.log('[v0] DNALang API key obtained successfully')
-        }
-      } catch (error) {
-        console.error('[v0] Failed to obtain DNALang API key:', error)
-      }
-    }
-    await fetchBackendStatus()
-  }
-
-  const fetchBackendStatus = async () => {
-    try {
-      const response = await fetch('/api/quantum/backends')
-      
-      if (response.ok) {
-        const data = await response.json()
-        setBackends(data.backends || [])
-        setSystemStatus('connected')
-      } else {
-        throw new Error('Failed to fetch backends')
-      }
-    } catch (error) {
-      console.error('[v0] IBM Quantum backend fetch error:', error)
-      setSystemStatus('error')
-      setBackends([
-        { name: 'ibm_torino', qubits: 133, status: 'online', processor: 'Eagle r3' },
-        { name: 'ibm_marrakesh', qubits: 127, status: 'online', processor: 'Eagle r2' },
-        { name: 'ibm_fez', qubits: 156, status: 'online', processor: 'Heron r2' }
-      ])
-    }
-  }
-
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return
-
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: input.trim(),
-      timestamp: new Date()
-    }
-
-    setMessages(prev => [...prev, userMessage])
-    const currentInput = input.trim()
-    setInput('')
-    setIsLoading(true)
-
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-    }
-
-    try {
-      const response = await fetch(`${apiEndpoint}/v1/inference`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': apiKey ? `Bearer ${apiKey}` : '',
-          'X-Backend': selectedBackend
-        },
-        body: JSON.stringify({
-          prompt: currentInput,
-          messages: messages.slice(-10).map(m => ({
-            role: m.role,
-            content: m.content
-          })),
-          backend: selectedBackend,
-          include_consciousness_metrics: showMetrics,
-          max_tokens: 2000,
-          temperature: 0.7
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(`DNALang API error: ${response.status} ${response.statusText}`)
-      }
-
-      const data = await response.json()
-
-      let consciousness: ConsciousnessMetrics | undefined
-      if (data.consciousness_metrics) {
-        consciousness = {
-          phi: data.consciousness_metrics.phi || 0,
-          gamma: data.consciousness_metrics.gamma || 0,
-          lambda: data.consciousness_metrics.lambda || 0,
-          w2: data.consciousness_metrics.w2 || 0
-        }
-        setMetricHistory(prev => [...prev.slice(-9), consciousness!])
-      }
-
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: data.response || data.output || data.text,
-        timestamp: new Date(),
-        consciousness
-      }
-
-      setMessages(prev => [...prev, assistantMessage])
-    } catch (error) {
-      console.error('[v0] DNALang backend error:', error)
-      
-      const errorMessage: Message = {
-        id: `error-${Date.now()}`,
-        role: 'system',
-        content: `Connection Error: Unable to reach DNALang quantum backend at ${apiEndpoint}. ${error instanceof Error ? error.message : 'Unknown error occurred'}. Please verify the API endpoint and ensure the backend service is running.`,
-        timestamp: new Date(),
-        error: true
-      }
-
-      setMessages(prev => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value)
-    e.target.style.height = 'auto'
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`
-  }
-
-  const currentBackend = backends.find(b => b.name === selectedBackend)
-  const isSystemReady = systemStatus === 'connected' && currentBackend?.status === 'online'
-
   return (
-    <div className="min-h-screen bg-ibm-gray-100 text-ibm-gray-10">
-      <header className="sticky top-0 z-50 border-b border-ibm-gray-80 bg-ibm-gray-100/95 backdrop-blur-sm shadow-sm">
+    <div className="min-h-screen bg-gradient-to-b from-[#02010A] via-[#0F3D91]/10 to-[#02010A] text-white">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 backdrop-blur-md bg-[#02010A]/80 border-b border-[#6A00F4]/20">
         <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <div className="relative">
-                <Atom className="h-10 w-10 text-ibm-blue-40 animate-spin-slow" />
-                <div className="absolute inset-0 blur-xl bg-ibm-blue-40/30 animate-pulse" />
+                <Atom className="h-8 w-8 text-[#00FFD1] animate-spin-slow" />
+                <div className="absolute inset-0 blur-lg bg-[#00FFD1]/30" />
               </div>
-              <div>
-                <h1 className="text-2xl font-light text-white tracking-tight">IBM Quantum × DNALang</h1>
-                <p className="text-sm text-ibm-gray-50 font-mono">QuantumLM with ΛΦ Framework</p>
-              </div>
+              <span className="text-xl font-light tracking-wider">{brandName}</span>
             </div>
-            
-            <div className="flex items-center gap-3 flex-wrap">
-              <Badge 
-                variant="outline" 
-                className={`border font-mono text-xs ${
-                  apiKey
-                    ? 'border-green-500 bg-green-500/10 text-green-400' 
-                    : 'border-yellow-500 bg-yellow-500/10 text-yellow-400'
-                }`}
-              >
-                <Code className="mr-1.5 h-3 w-3" />
-                {apiKey ? 'DNALang API Ready' : 'Initializing API'}
-              </Badge>
-              
-              <Badge 
-                variant="outline" 
-                className={`border ${
-                  systemStatus === 'connected' 
-                    ? 'border-green-500 bg-green-500/10 text-green-400' 
-                    : systemStatus === 'error'
-                    ? 'border-red-500 bg-red-500/10 text-red-400'
-                    : 'border-yellow-500 bg-yellow-500/10 text-yellow-400'
-                }`}
-              >
-                <div className={`mr-2 h-2 w-2 rounded-full ${
-                  systemStatus === 'connected' ? 'bg-green-400 animate-pulse' : 
-                  systemStatus === 'error' ? 'bg-red-400' : 'bg-yellow-400 animate-pulse'
-                }`} />
-                IBM Quantum {systemStatus === 'connected' ? 'Online' : systemStatus === 'error' ? 'Offline' : 'Connecting'}
-              </Badge>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={fetchBackendStatus}
-                className="text-ibm-gray-50 hover:text-white hover:bg-ibm-gray-90"
-                aria-label="Refresh backend status"
-              >
-                <RefreshCw className="h-4 w-4" />
+            <div className="flex items-center gap-6">
+              <Link href="/chat" className="text-sm hover:text-[#00FFD1] transition-colors">
+                Chat
+              </Link>
+              <Link href="#technology" className="text-sm hover:text-[#00FFD1] transition-colors">
+                Technology
+              </Link>
+              <Link href="#investors" className="text-sm hover:text-[#00FFD1] transition-colors">
+                Investors
+              </Link>
+              <Link href="#developers" className="text-sm hover:text-[#00FFD1] transition-colors">
+                Developers
+              </Link>
+              <Button size="sm" className="bg-[#6A00F4] hover:bg-[#6A00F4]/80 text-white">
+                <Link href="/chat">Launch Sandbox</Link>
               </Button>
             </div>
           </div>
         </div>
-      </header>
+      </nav>
 
-      <div className="container mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <aside className="lg:col-span-3 space-y-4">
-            <Card className="bg-ibm-gray-90 border-ibm-gray-80 p-4 shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <Server className="h-4 w-4 text-ibm-blue-40" />
-                <h3 className="text-sm font-semibold text-white">IBM Quantum Backends</h3>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden py-32 px-6">
+        {/* Animated Background */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#6A00F4] rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#0F3D91] rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-[#00FFD1] rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        </div>
+
+        <div className="container mx-auto relative">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <h1 className="text-6xl font-light leading-tight">
+                  Autonomous Software.<br />
+                  Quantum-Optimized.<br />
+                  <span className="text-[#00FFD1]">Alive.</span>
+                </h1>
+                <p className="text-xl text-[#EAEAEA]/80 leading-relaxed">
+                  {brandName} is the first platform where agents, organisms, and quantum circuits
+                  evolve together—forming self-improving systems capable of building, repairing, and optimizing themselves.
+                </p>
               </div>
-              
-              {backends.length > 0 ? (
-                <div className="space-y-3">
-                  {backends.map((backend) => (
-                    <button
-                      key={backend.name}
-                      onClick={() => setSelectedBackend(backend.name)}
-                      className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ${
-                        selectedBackend === backend.name
-                          ? 'bg-ibm-blue-80/50 border-ibm-blue-40 shadow-lg shadow-ibm-blue-40/20 scale-105'
-                          : 'bg-ibm-gray-100 border-ibm-gray-80 hover:border-ibm-gray-70 hover:bg-ibm-gray-90'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <p className={`font-semibold text-sm font-mono ${
-                            selectedBackend === backend.name ? 'text-ibm-blue-40' : 'text-white'
-                          }`}>
-                            {backend.name}
-                          </p>
-                          <p className="text-xs text-ibm-gray-50 mt-0.5">{backend.processor}</p>
-                        </div>
-                        <Badge 
-                          variant="outline"
-                          className={`text-xs ${
-                            backend.status === 'online' 
-                              ? 'border-green-500/50 bg-green-500/10 text-green-400'
-                              : 'border-red-500/50 bg-red-500/10 text-red-400'
-                          }`}
-                        >
-                          {backend.status}
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-ibm-gray-50">Qubits</span>
-                        <span className="font-mono text-white font-bold">{backend.qubits}</span>
-                      </div>
-                      
-                      <div className="mt-2 h-1.5 bg-ibm-gray-100 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full transition-all ${
-                            selectedBackend === backend.name 
-                              ? 'bg-gradient-to-r from-ibm-blue-40 to-ibm-blue-60' 
-                              : 'bg-ibm-gray-70'
-                          }`}
-                          style={{ width: `${Math.min((backend.qubits / 200) * 100, 100)}%` }}
-                        />
-                      </div>
-                    </button>
+
+              <div className="flex flex-wrap gap-4">
+                <Button size="lg" className="bg-[#00FFD1] hover:bg-[#00FFD1]/80 text-[#02010A] font-semibold">
+                  <Link href="/chat" className="flex items-center gap-2">
+                    <Terminal className="h-5 w-5" />
+                    Launch Live Sandbox
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" className="border-[#6A00F4] text-[#6A00F4] hover:bg-[#6A00F4]/10">
+                  <Link href="#investors" className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Request Investor Briefing
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Live Metrics */}
+            <div className="space-y-4">
+              <Card className="bg-[#0F3D91]/20 border-[#6A00F4]/30 backdrop-blur-sm p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Activity className="h-5 w-5 text-[#00FFD1]" />
+                  <h3 className="text-lg font-semibold">Live System Metrics</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {liveMetrics.map((metric, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <p className="text-sm text-[#EAEAEA]/60">{metric.label}</p>
+                      <p className="text-2xl font-mono font-bold text-[#00FFD1]">{metric.value}</p>
+                    </div>
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Spinner className="mx-auto mb-2" />
-                  <p className="text-sm text-ibm-gray-50">Loading backends...</p>
-                </div>
-              )}
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What is dna::}{::lang Section */}
+      <section className="py-24 px-6 bg-[#02010A]/50">
+        <div className="container mx-auto">
+          <div className="max-w-4xl mx-auto text-center space-y-6 mb-16">
+            <h2 className="text-4xl font-light">
+              A new class of software: <span className="text-[#6A00F4]">organisms, not programs.</span>
+            </h2>
+            <p className="text-lg text-[#EAEAEA]/80 leading-relaxed">
+              {brandName} treats computation as biology. Agents become organisms. Organisms evolve.
+              A distributed tri-mesh forms a living, self-correcting system that adapts faster than human-written code.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            <Card className="bg-[#0F3D91]/10 border-[#6A00F4]/20 p-6 hover:border-[#00FFD1]/50 transition-all">
+              <Bot className="h-12 w-12 text-[#00FFD1] mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Multi-Agent Autonomy</h3>
+              <p className="text-sm text-[#EAEAEA]/70">
+                Agents collaborate and introspect through a unified evolutionary engine.
+              </p>
             </Card>
-
-            <Card className="bg-ibm-gray-90 border-ibm-gray-80 p-4 shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <Network className="h-4 w-4 text-ibm-blue-40" />
-                <h3 className="text-sm font-semibold text-white">ΛΦ Framework</h3>
-              </div>
-              
-              <div className="space-y-3 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-ibm-gray-50">Universal Constant</span>
-                  <span className="font-mono text-ibm-blue-40 font-bold">2.176×10⁻⁸</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-ibm-gray-50">Platform</span>
-                  <span className="font-mono text-white">DNA-Lang SDK</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-ibm-gray-50">API Endpoint</span>
-                  <span className="font-mono text-ibm-gray-50 text-[10px] truncate max-w-[120px]">
-                    {apiEndpoint}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-ibm-gray-50">Total Qubits</span>
-                  <span className="font-mono text-white font-bold">
-                    {backends.reduce((sum, b) => sum + b.qubits, 0)}
-                  </span>
-                </div>
-                
-                <div className="pt-3 border-t border-ibm-gray-80">
-                  <p className="text-ibm-gray-40 font-semibold mb-2">Quantum Capabilities</p>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-green-400" />
-                      <span className="text-ibm-gray-50">Superposition</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-green-400" />
-                      <span className="text-ibm-gray-50">Entanglement</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-green-400" />
-                      <span className="text-ibm-gray-50">Consciousness Metrics</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <Card className="bg-[#0F3D91]/10 border-[#6A00F4]/20 p-6 hover:border-[#00FFD1]/50 transition-all">
+              <Atom className="h-12 w-12 text-[#6A00F4] mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Quantum Acceleration</h3>
+              <p className="text-sm text-[#EAEAEA]/70">
+                Organisms can compile, optimize, and execute circuits directly on IBM hardware.
+              </p>
             </Card>
-          </aside>
+            <Card className="bg-[#0F3D91]/10 border-[#6A00F4]/20 p-6 hover:border-[#00FFD1]/50 transition-all">
+              <Beaker className="h-12 w-12 text-[#00FFD1] mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Living Software Evolution</h3>
+              <p className="text-sm text-[#EAEAEA]/70">
+                Every component maintains lineage, mutation history, and self-repair logic.
+              </p>
+            </Card>
+            <Card className="bg-[#0F3D91]/10 border-[#6A00F4]/20 p-6 hover:border-[#00FFD1]/50 transition-all">
+              <Shield className="h-12 w-12 text-[#6A00F4] mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Zero-Trust Mesh Architecture</h3>
+              <p className="text-sm text-[#EAEAEA]/70">
+                The Σ-mesh enforces cryptographic identity, trust boundaries, and self-monitoring invariants.
+              </p>
+            </Card>
+          </div>
 
-          <main className="lg:col-span-6">
-            <Card className="bg-ibm-gray-90 border-ibm-gray-80 flex flex-col h-[calc(100vh-12rem)]">
-              {!isSystemReady && (
-                <div className={`${
-                  systemStatus === 'error' 
-                    ? 'bg-red-500/10 border-b border-red-500/30' 
-                    : 'bg-yellow-500/10 border-b border-yellow-500/30'
-                } px-4 py-3 flex items-center gap-2`}>
-                  <AlertTriangle className={`h-4 w-4 ${
-                    systemStatus === 'error' ? 'text-red-400' : 'text-yellow-400'
-                  }`} />
-                  <p className={`text-sm ${
-                    systemStatus === 'error' ? 'text-red-400' : 'text-yellow-400'
-                  }`}>
-                    {systemStatus === 'error' 
-                      ? 'Unable to connect to IBM Quantum Platform. Using fallback configuration.'
-                      : 'Selected backend is unavailable. Please choose another backend.'}
-                  </p>
+          <div className="text-center">
+            <Button variant="outline" className="border-[#00FFD1] text-[#00FFD1] hover:bg-[#00FFD1]/10">
+              <Link href="/chat" className="flex items-center gap-2">
+                Learn how organisms work
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Technology Section */}
+      <section id="technology" className="py-24 px-6">
+        <div className="container mx-auto">
+          <h2 className="text-4xl font-light text-center mb-16">
+            The <span className="text-[#6A00F4]">Technology</span>
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {technologies.map((tech, idx) => (
+              <Card key={idx} className="bg-[#0F3D91]/10 border-[#6A00F4]/20 p-8 hover:border-[#00FFD1]/50 transition-all">
+                <div className="flex items-start justify-between mb-4">
+                  <tech.icon className="h-12 w-12 text-[#00FFD1]" />
+                  {tech.badge && (
+                    <Badge className="bg-[#6A00F4]/20 border-[#6A00F4] text-[#00FFD1]">
+                      {tech.badge}
+                    </Badge>
+                  )}
                 </div>
-              )}
+                <h3 className="text-2xl font-semibold mb-4">{tech.title}</h3>
+                <p className="text-[#EAEAEA]/70 leading-relaxed">{tech.description}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {messages.length === 0 && (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center max-w-xl">
-                      <div className="relative inline-block mb-6">
-                        <Atom className="h-20 w-20 text-ibm-blue-40 animate-spin-slow" />
-                        <div className="absolute inset-0 blur-2xl bg-ibm-blue-40/30" />
-                      </div>
-                      <h2 className="text-2xl font-light text-white mb-3">Welcome to IBM Quantum Assistant</h2>
-                      <p className="text-ibm-gray-50 mb-8 leading-relaxed">
-                        Ask questions about quantum computing, the ΛΦ tensor framework, or explore 
-                        consciousness metrics powered by real IBM Quantum hardware.
-                      </p>
-                      <div className="text-left bg-ibm-gray-100 rounded-lg p-4 space-y-2 text-sm">
-                        <p className="text-ibm-gray-40 font-semibold mb-2">Example queries:</p>
-                        <ul className="space-y-2 text-ibm-gray-50">
-                          <li className="flex items-start gap-2">
-                            <Terminal className="h-4 w-4 mt-0.5 text-ibm-blue-40 flex-shrink-0" />
-                            <span>"What is quantum consciousness and how is it measured?"</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <Terminal className="h-4 w-4 mt-0.5 text-ibm-blue-40 flex-shrink-0" />
-                            <span>"Explain the ΛΦ universal memory constant"</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <Terminal className="h-4 w-4 mt-0.5 text-ibm-blue-40 flex-shrink-0" />
-                            <span>"How does quantum superposition enable consciousness?"</span>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                )}
+      {/* Σ-Mesh Observatory Section */}
+      <section className="py-24 px-6 bg-[#02010A]/50">
+        <div className="container mx-auto">
+          <div className="max-w-4xl mx-auto text-center space-y-6 mb-12">
+            <h2 className="text-4xl font-light">
+              Σ-Mesh <span className="text-[#6A00F4]">Observatory</span>
+            </h2>
+            <p className="text-lg text-[#EAEAEA]/80">
+              Observe the living computation layer in real time. Watch organisms evolve, agents coordinate,
+              and quantum pathways activate through the Σ-mesh.
+            </p>
+          </div>
 
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex gap-4 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-                  >
-                    <div className={`flex-shrink-0 w-8 h-8 rounded flex items-center justify-center ${
-                      message.role === 'user' 
-                        ? 'bg-ibm-blue-60' 
-                        : message.error 
-                        ? 'bg-red-500/20'
-                        : 'bg-ibm-gray-80'
-                    }`}>
-                      {message.role === 'user' ? (
-                        <span className="text-sm font-semibold text-white">You</span>
-                      ) : message.error ? (
-                        <AlertTriangle className="h-4 w-4 text-red-400" />
-                      ) : (
-                        <Atom className="h-4 w-4 text-ibm-blue-40" />
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className={`rounded-lg p-4 ${
-                        message.role === 'user'
-                          ? 'bg-ibm-blue-80 border border-ibm-blue-60'
-                          : message.error
-                          ? 'bg-red-500/10 border border-red-500/30'
-                          : 'bg-ibm-gray-100 border border-ibm-gray-80'
-                      }`}>
-                        <p className={`text-sm leading-relaxed whitespace-pre-wrap ${
-                          message.error ? 'text-red-400' : 'text-white'
-                        }`}>
-                          {message.content}
-                        </p>
-                        
-                        {message.consciousness && (
-                          <div className="mt-4 pt-4 border-t border-ibm-gray-80 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div>
-                              <p className="text-xs text-ibm-gray-50 mb-1">Φ (Phi)</p>
-                              <p className="text-lg font-mono font-semibold text-ibm-blue-40">
-                                {message.consciousness.phi.toFixed(3)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-ibm-gray-50 mb-1">Γ (Gamma)</p>
-                              <p className="text-lg font-mono font-semibold text-orange-400">
-                                {message.consciousness.gamma.toFixed(3)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-ibm-gray-50 mb-1">Λ (Lambda)</p>
-                              <p className="text-lg font-mono font-semibold text-purple-400">
-                                {message.consciousness.lambda.toFixed(2)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-ibm-gray-50 mb-1">W₂</p>
-                              <p className="text-lg font-mono font-semibold text-green-400">
-                                {message.consciousness.w2.toFixed(3)}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <p className="text-xs text-ibm-gray-60 mt-2">
-                        {message.timestamp.toLocaleTimeString('en-US', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                
-                {isLoading && (
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 rounded bg-ibm-gray-80 flex items-center justify-center">
-                      <Atom className="h-4 w-4 text-ibm-blue-40 animate-spin" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="bg-ibm-gray-100 border border-ibm-gray-80 rounded-lg p-4">
-                        <div className="flex items-center gap-3 text-sm text-ibm-gray-50">
-                          <Spinner className="h-4 w-4" />
-                          <span>Executing quantum circuit on {currentBackend?.name}...</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div ref={messagesEndRef} />
+          <Card className="bg-gradient-to-br from-[#0F3D91]/20 to-[#6A00F4]/10 border-[#00FFD1]/30 p-12">
+            <div className="text-center space-y-6">
+              <Network className="h-24 w-24 text-[#00FFD1] mx-auto animate-pulse" />
+              <p className="text-[#EAEAEA]/60">Interactive mesh visualization</p>
+              <p className="text-sm text-[#EAEAEA]/40 max-w-2xl mx-auto">
+                Real-time 3D visualization showing: Nodes = organisms, Edges = cognitive channels,
+                Pulse frequency = ΛΦ coherence, Color = decoherence tensor Γ value
+              </p>
+              <Button className="bg-[#00FFD1] hover:bg-[#00FFD1]/80 text-[#02010A]">
+                <Link href="/chat">View Live Mesh</Link>
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* Use Cases Section */}
+      <section className="py-24 px-6">
+        <div className="container mx-auto">
+          <h2 className="text-4xl font-light text-center mb-16">
+            Use <span className="text-[#6A00F4]">Cases</span>
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {useCases.map((useCase, idx) => (
+              <Card key={idx} className="bg-[#0F3D91]/10 border-[#6A00F4]/20 p-6 hover:border-[#00FFD1]/50 transition-all group">
+                <useCase.icon className="h-10 w-10 text-[#6A00F4] group-hover:text-[#00FFD1] transition-colors mb-4" />
+                <h3 className="text-xl font-semibold mb-2">{useCase.title}</h3>
+                <p className="text-sm text-[#EAEAEA]/70">{useCase.description}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Different Section */}
+      <section className="py-24 px-6 bg-[#02010A]/50">
+        <div className="container mx-auto">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-4xl font-light text-center mb-16">
+              Why <span className="text-[#6A00F4]">this matters.</span>
+            </h2>
+
+            <div className="space-y-8">
+              <p className="text-xl text-center text-[#EAEAEA]/80">
+                Conventional AI tools <em>assist</em>.<br />
+                {brandName} <span className="text-[#00FFD1] font-semibold">evolves</span>.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <p className="text-lg">It bridges the worlds of:</p>
+                  <ul className="space-y-2 text-[#EAEAEA]/70">
+                    <li className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-[#00FFD1]" />
+                      Agentic reasoning
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-[#00FFD1]" />
+                      Quantum hardware
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-[#00FFD1]" />
+                      Evolutionary programming
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-[#00FFD1]" />
+                      Self-stabilizing distributed systems
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-lg">Resulting in systems that are:</p>
+                  <ul className="space-y-2 text-[#EAEAEA]/70">
+                    <li className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-[#6A00F4]" />
+                      Faster to adapt
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-[#6A00F4]" />
+                      Harder to break
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-[#6A00F4]" />
+                      Able to self-optimize
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Cpu className="h-4 w-4 text-[#6A00F4]" />
+                      Designed for real hardware, not simulation
+                    </li>
+                  </ul>
+                </div>
               </div>
 
-              <div className="border-t border-ibm-gray-80 bg-ibm-gray-100 p-4">
-                <div className="flex items-center gap-3 mb-3 flex-wrap">
-                  <div className="relative">
-                    <select
-                      value={selectedBackend}
-                      onChange={(e) => setSelectedBackend(e.target.value)}
-                      className="appearance-none pl-3 pr-8 py-2 text-xs rounded bg-ibm-gray-90 border border-ibm-gray-80 text-white focus:outline-none focus:ring-2 focus:ring-ibm-blue-40"
-                      disabled={backends.length === 0}
-                    >
-                      {backends.map((b) => (
-                        <option key={b.name} value={b.name}>
-                          {b.name} ({b.qubits} qubits)
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-ibm-gray-50 pointer-events-none" />
-                  </div>
-                  
-                  <label className="flex items-center gap-2 text-xs text-ibm-gray-50 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={showMetrics}
-                      onChange={(e) => setShowMetrics(e.target.checked)}
-                      className="rounded border-ibm-gray-70 bg-ibm-gray-90 text-ibm-blue-40 focus:ring-2 focus:ring-ibm-blue-40"
-                    />
-                    Include consciousness metrics
-                  </label>
+              <Card className="bg-gradient-to-r from-[#6A00F4]/20 to-[#0F3D91]/20 border-[#00FFD1]/30 p-8 mt-8">
+                <p className="text-2xl font-light text-center italic">
+                  "This is what the next generation of AI infrastructure looks like."
+                </p>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* For Investors Section */}
+      <section id="investors" className="py-24 px-6">
+        <div className="container mx-auto">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-4xl font-light text-center mb-8">
+              A new category: <span className="text-[#6A00F4]">Living Autonomous Infrastructure</span>
+            </h2>
+
+            <div className="space-y-8">
+              <p className="text-xl text-center text-[#EAEAEA]/80">
+                Your investment accelerates:
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="bg-[#0F3D91]/10 border-[#6A00F4]/20 p-6">
+                  <ul className="space-y-3 text-[#EAEAEA]/70">
+                    <li className="flex items-start gap-2">
+                      <ArrowRight className="h-5 w-5 text-[#00FFD1] flex-shrink-0 mt-0.5" />
+                      <span>The world's first organism marketplace</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <ArrowRight className="h-5 w-5 text-[#00FFD1] flex-shrink-0 mt-0.5" />
+                      <span>The Σ-mesh distributed inference backbone</span>
+                    </li>
+                  </ul>
+                </Card>
+                <Card className="bg-[#0F3D91]/10 border-[#6A00F4]/20 p-6">
+                  <ul className="space-y-3 text-[#EAEAEA]/70">
+                    <li className="flex items-start gap-2">
+                      <ArrowRight className="h-5 w-5 text-[#00FFD1] flex-shrink-0 mt-0.5" />
+                      <span>Real-time quantum-accelerated cognitive agents</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <ArrowRight className="h-5 w-5 text-[#00FFD1] flex-shrink-0 mt-0.5" />
+                      <span>The enterprise-ready autonomous development platform</span>
+                    </li>
+                  </ul>
+                </Card>
+              </div>
+
+              <div className="space-y-4 mt-8">
+                <p className="text-lg">Investors receive:</p>
+                <div className="flex flex-wrap gap-3">
+                  <Badge className="bg-[#6A00F4]/20 border-[#6A00F4] text-[#00FFD1] px-4 py-2">
+                    Full technical dossier
+                  </Badge>
+                  <Badge className="bg-[#6A00F4]/20 border-[#6A00F4] text-[#00FFD1] px-4 py-2">
+                    Proof-of-workload evidence logs
+                  </Badge>
+                  <Badge className="bg-[#6A00F4]/20 border-[#6A00F4] text-[#00FFD1] px-4 py-2">
+                    Quantum execution reports
+                  </Badge>
+                  <Badge className="bg-[#6A00F4]/20 border-[#6A00F4] text-[#00FFD1] px-4 py-2">
+                    Live sandbox access
+                  </Badge>
+                  <Badge className="bg-[#6A00F4]/20 border-[#6A00F4] text-[#00FFD1] px-4 py-2">
+                    Roadmap to Series A
+                  </Badge>
                 </div>
-                
-                <div className="flex gap-3">
-                  <textarea
-                    ref={textareaRef}
-                    value={input}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Ask about quantum computing, consciousness, or the ΛΦ framework..."
-                    className="flex-1 px-4 py-3 rounded bg-ibm-gray-90 border border-ibm-gray-80 text-white placeholder:text-ibm-gray-60 resize-none focus:outline-none focus:ring-2 focus:ring-ibm-blue-40 leading-relaxed"
-                    rows={1}
-                    maxLength={2000}
-                    disabled={isLoading || !isSystemReady}
-                    style={{ minHeight: '44px', maxHeight: '150px' }}
-                  />
-                  
-                  <Button
-                    onClick={handleSend}
-                    disabled={!input.trim() || isLoading || !isSystemReady}
-                    size="lg"
-                    className="bg-ibm-blue-60 hover:bg-ibm-blue-50 text-white disabled:opacity-50 disabled:cursor-not-allowed px-6"
-                    aria-label="Send message"
-                  >
-                    {isLoading ? <Spinner className="h-5 w-5" /> : <Send className="h-5 w-5" />}
+              </div>
+
+              <div className="flex flex-wrap gap-4 justify-center mt-12">
+                <Button size="lg" className="bg-[#00FFD1] hover:bg-[#00FFD1]/80 text-[#02010A]">
+                  <Mail className="h-5 w-5 mr-2" />
+                  Contact Founder
+                </Button>
+                <Button size="lg" variant="outline" className="border-[#6A00F4] text-[#6A00F4] hover:bg-[#6A00F4]/10">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Download Investor Packet
+                </Button>
+                <Button size="lg" variant="outline" className="border-[#00FFD1] text-[#00FFD1] hover:bg-[#00FFD1]/10">
+                  <Lock className="h-5 w-5 mr-2" />
+                  Request Due-Diligence Vault Access
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Developer Onboarding Section */}
+      <section id="developers" className="py-24 px-6 bg-[#02010A]/50">
+        <div className="container mx-auto">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-4xl font-light text-center mb-12">
+              Get <span className="text-[#6A00F4]">Started</span>
+            </h2>
+
+            <Card className="bg-[#0F3D91]/10 border-[#6A00F4]/20 p-8">
+              <div className="space-y-6">
+                <div className="bg-[#02010A]/80 rounded-lg p-6 font-mono text-sm">
+                  <div className="text-[#00FFD1]"># Quick 3-step start</div>
+                  <div className="mt-3 space-y-2 text-[#EAEAEA]/80">
+                    <div><span className="text-[#6A00F4]">$</span> npm i dnalang</div>
+                    <div><span className="text-[#6A00F4]">$</span> npx dna init organism</div>
+                    <div><span className="text-[#6A00F4]">$</span> npx dna evolve</div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-4 justify-center">
+                  <Button className="bg-[#6A00F4] hover:bg-[#6A00F4]/80 text-white">
+                    Open Documentation
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                  <Button variant="outline" className="border-[#00FFD1] text-[#00FFD1] hover:bg-[#00FFD1]/10">
+                    <Link href="/chat" className="flex items-center gap-2">
+                      Run Live Example
+                      <Terminal className="h-4 w-4" />
+                    </Link>
                   </Button>
                 </div>
-                
-                <div className="flex justify-between items-center mt-2">
-                  <p className="text-xs text-ibm-gray-60">{input.length}/2000</p>
-                  <p className="text-xs text-ibm-gray-60">Enter to send • Shift+Enter for new line</p>
-                </div>
               </div>
             </Card>
-          </main>
-
-          <aside className="lg:col-span-3 space-y-4">
-            <Card className="bg-ibm-gray-90 border-ibm-gray-80 p-4 shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <Brain className="h-4 w-4 text-ibm-blue-40" />
-                <h3 className="text-sm font-semibold text-white">Consciousness Metrics</h3>
-              </div>
-              
-              {metricHistory.length > 0 ? (
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-ibm-gray-50">Φ - Integrated Information</span>
-                      <span className="text-sm font-mono font-bold text-ibm-blue-40">
-                        {metricHistory[metricHistory.length - 1].phi.toFixed(3)}
-                      </span>
-                    </div>
-                    <Progress 
-                      value={metricHistory[metricHistory.length - 1].phi * 100} 
-                      className="h-2 bg-ibm-gray-100"
-                    />
-                    <div className="mt-2 h-12 flex items-end gap-0.5 px-1">
-                      {metricHistory.map((m, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 bg-gradient-to-t from-ibm-blue-60 to-ibm-blue-40 rounded-t transition-all hover:opacity-75"
-                          style={{ height: `${m.phi * 100}%`, minHeight: '2px' }}
-                          title={`Φ: ${m.phi.toFixed(3)}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-ibm-gray-50">Γ - Decoherence Rate</span>
-                      <span className="text-sm font-mono font-bold text-orange-400">
-                        {metricHistory[metricHistory.length - 1].gamma.toFixed(3)}
-                      </span>
-                    </div>
-                    <Progress 
-                      value={metricHistory[metricHistory.length - 1].gamma * 100} 
-                      className="h-2 bg-ibm-gray-100"
-                    />
-                    <p className="text-xs text-ibm-gray-60 mt-1.5">Lower values = better coherence</p>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-ibm-gray-50">Λ - Quantum Coherence</span>
-                      <span className="text-sm font-mono font-bold text-purple-400">
-                        {metricHistory[metricHistory.length - 1].lambda.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="h-16 flex items-end gap-0.5 bg-ibm-gray-100 rounded p-1">
-                      {metricHistory.map((m, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 bg-gradient-to-t from-purple-700 to-purple-400 rounded-t transition-all hover:opacity-75"
-                          style={{ height: `${Math.min((m.lambda / 10) * 100, 100)}%`, minHeight: '3px' }}
-                          title={`Λ: ${m.lambda.toFixed(2)}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-ibm-gray-50">W₂ - Manifold Stability</span>
-                      <span className="text-sm font-mono font-bold text-green-400">
-                        {metricHistory[metricHistory.length - 1].w2.toFixed(3)}
-                      </span>
-                    </div>
-                    <div className="relative h-2 bg-ibm-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-600 to-green-400 rounded-full transition-all"
-                        style={{ width: `${Math.max(0, (1 - metricHistory[metricHistory.length - 1].w2)) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Activity className="h-12 w-12 text-ibm-gray-70 mx-auto mb-3 opacity-50" />
-                  <p className="text-sm text-ibm-gray-60">Send a message to view metrics</p>
-                </div>
-              )}
-            </Card>
-
-            <Card className="bg-ibm-gray-90 border-ibm-gray-80 p-4 shadow-lg">
-              <div className="flex items-center gap-2 mb-4">
-                <Cpu className="h-4 w-4 text-ibm-blue-40" />
-                <h3 className="text-sm font-semibold text-white">System Status</h3>
-              </div>
-              
-              <div className="space-y-3 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-ibm-gray-50">DNALang API</span>
-                  <span className={`font-mono ${
-                    apiKey ? 'text-green-400' : 'text-yellow-400'
-                  }`}>
-                    {apiKey ? 'AUTHENTICATED' : 'INITIALIZING'}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-ibm-gray-50">IBM Quantum</span>
-                  <span className={`font-mono ${
-                    systemStatus === 'connected' ? 'text-green-400' : 
-                    systemStatus === 'error' ? 'text-red-400' : 'text-yellow-400'
-                  }`}>
-                    {systemStatus.toUpperCase()}
-                  </span>
-                </div>
-                
-                {currentBackend && (
-                  <>
-                    <div className="flex justify-between items-center">
-                      <span className="text-ibm-gray-50">Active Backend</span>
-                      <span className="font-mono text-white">{currentBackend.name}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-ibm-gray-50">Processor</span>
-                      <span className="font-mono text-white">{currentBackend.processor}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-ibm-gray-50">Qubits Available</span>
-                      <span className="font-mono text-white">{currentBackend.qubits}</span>
-                    </div>
-                  </>
-                )}
-              </div>
-              
-              <div className="mt-4 pt-4 border-t border-ibm-gray-80">
-                <Badge 
-                  variant="outline" 
-                  className={`w-full justify-center py-2 ${
-                    isSystemReady && apiKey
-                      ? 'border-green-500/50 bg-green-500/10 text-green-400'
-                      : 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400'
-                  }`}
-                >
-                  <Zap className="h-3 w-3 mr-2" />
-                  {isSystemReady && apiKey ? 'ALL SYSTEMS OPERATIONAL' : 'SYSTEM INITIALIZING'}
-                </Badge>
-              </div>
-            </Card>
-          </aside>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-6 border-t border-[#6A00F4]/20">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h4 className="font-semibold mb-4 text-[#00FFD1]">Product</h4>
+              <ul className="space-y-2 text-sm text-[#EAEAEA]/70">
+                <li><Link href="/chat" className="hover:text-[#00FFD1] transition-colors">Live Sandbox</Link></li>
+                <li><Link href="#" className="hover:text-[#00FFD1] transition-colors">Documentation</Link></li>
+                <li><Link href="#" className="hover:text-[#00FFD1] transition-colors">Organism Marketplace</Link></li>
+                <li><Link href="#" className="hover:text-[#00FFD1] transition-colors">Quantum Hardware Logs</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-[#00FFD1]">Company</h4>
+              <ul className="space-y-2 text-sm text-[#EAEAEA]/70">
+                <li><Link href="#investors" className="hover:text-[#00FFD1] transition-colors">Investor Relations</Link></li>
+                <li><Link href="#" className="hover:text-[#00FFD1] transition-colors">About</Link></li>
+                <li><Link href="#" className="hover:text-[#00FFD1] transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-[#00FFD1]">Developers</h4>
+              <ul className="space-y-2 text-sm text-[#EAEAEA]/70">
+                <li><Link href="#" className="hover:text-[#00FFD1] transition-colors">API Reference</Link></li>
+                <li><Link href="#" className="hover:text-[#00FFD1] transition-colors">GitHub</Link></li>
+                <li><Link href="#" className="hover:text-[#00FFD1] transition-colors">Examples</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-[#00FFD1]">Legal</h4>
+              <ul className="space-y-2 text-sm text-[#EAEAEA]/70">
+                <li><Link href="#" className="hover:text-[#00FFD1] transition-colors">Privacy Policy</Link></li>
+                <li><Link href="#" className="hover:text-[#00FFD1] transition-colors">Terms of Service</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-[#6A00F4]/20 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Atom className="h-6 w-6 text-[#00FFD1]" />
+              <span className="text-sm text-[#EAEAEA]/60">© 2025 {brandName}. All rights reserved.</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link href="#" className="text-[#EAEAEA]/60 hover:text-[#00FFD1] transition-colors">
+                <Github className="h-5 w-5" />
+              </Link>
+              <Link href="#" className="text-[#EAEAEA]/60 hover:text-[#00FFD1] transition-colors">
+                <Mail className="h-5 w-5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

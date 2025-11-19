@@ -3,11 +3,11 @@ import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'IBM Quantum Assistant - QuantumLM Chatbot',
-  description: 'Production-ready quantum computing chatbot powered by IBM Quantum hardware, DNA-Lang, and the ΛΦ universal memory framework. Explore quantum consciousness with real-time metrics from IBM Eagle and Heron processors.',
-  keywords: ['quantum computing', 'IBM Quantum', 'quantum AI', 'consciousness metrics', 'ΛΦ framework', 'DNA-Lang', 'quantum chatbot'],
-  authors: [{ name: 'IBM Quantum' }],
-  generator: 'v0.app',
+  title: 'dna::}{::lang - Autonomous Software. Quantum-Optimized. Alive.',
+  description: 'The first platform where agents, organisms, and quantum circuits evolve together. Self-improving systems powered by IBM Quantum hardware, evolutionary programming, and the ΛΦ universal memory framework.',
+  keywords: ['quantum computing', 'autonomous agents', 'living software', 'quantum organisms', 'IBM Quantum', 'evolutionary programming', 'ΛΦ framework', 'DNA-Lang', 'self-evolving systems', 'quantum consciousness'],
+  authors: [{ name: 'dna::}{::lang' }],
+  generator: 'dna::}{::lang',
   icons: {
     icon: [
       {
@@ -16,10 +16,21 @@ export const metadata: Metadata = {
       },
     ],
   },
+  openGraph: {
+    title: 'dna::}{::lang - Living Autonomous Infrastructure',
+    description: 'Autonomous software that evolves. Quantum-optimized organisms powered by IBM Quantum hardware.',
+    type: 'website',
+    url: 'https://dnalang.dev',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'dna::}{::lang - Autonomous Software',
+    description: 'The first platform where agents, organisms, and quantum circuits evolve together.',
+  },
 }
 
 export const viewport = {
-  themeColor: '#161616',
+  themeColor: '#02010A',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -35,7 +46,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>

@@ -3,9 +3,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* IBM Carbon Design System color palette */
+/* dna::}{::lang Brand Color Palette */
 :root {
-  /* IBM Gray Scale */
+  /* IBM Gray Scale (retained for compatibility) */
   --ibm-gray-10: #f4f4f4;
   --ibm-gray-20: #e0e0e0;
   --ibm-gray-30: #c6c6c6;
@@ -16,8 +16,8 @@
   --ibm-gray-80: #393939;
   --ibm-gray-90: #262626;
   --ibm-gray-100: #161616;
-  
-  /* IBM Blue */
+
+  /* IBM Blue (retained for compatibility) */
   --ibm-blue-10: #edf5ff;
   --ibm-blue-20: #d0e2ff;
   --ibm-blue-30: #a6c8ff;
@@ -26,32 +26,39 @@
   --ibm-blue-60: #0f62fe;
   --ibm-blue-70: #0043ce;
   --ibm-blue-80: #002d9c;
-  
-  --background: var(--ibm-gray-100);
-  --foreground: var(--ibm-gray-10);
+
+  /* dna::}{::lang Brand Colors */
+  --dna-deep-space-black: #02010A;
+  --dna-quantum-blue: #0F3D91;
+  --dna-meshing-violet: #6A00F4;
+  --dna-neon-teal: #00FFD1;
+  --dna-soft-white: #EAEAEA;
+
+  --background: var(--dna-deep-space-black);
+  --foreground: var(--dna-soft-white);
   --card: var(--ibm-gray-90);
-  --card-foreground: var(--ibm-gray-10);
+  --card-foreground: var(--dna-soft-white);
   --popover: var(--ibm-gray-90);
-  --popover-foreground: var(--ibm-gray-10);
-  --primary: var(--ibm-blue-60);
+  --popover-foreground: var(--dna-soft-white);
+  --primary: var(--dna-meshing-violet);
   --primary-foreground: #ffffff;
-  --secondary: var(--ibm-gray-80);
-  --secondary-foreground: var(--ibm-gray-10);
+  --secondary: var(--dna-quantum-blue);
+  --secondary-foreground: var(--dna-soft-white);
   --muted: var(--ibm-gray-80);
   --muted-foreground: var(--ibm-gray-50);
-  --accent: var(--ibm-blue-70);
-  --accent-foreground: var(--ibm-gray-10);
+  --accent: var(--dna-neon-teal);
+  --accent-foreground: var(--dna-deep-space-black);
   --destructive: #da1e28;
   --destructive-foreground: #ffffff;
   --border: var(--ibm-gray-80);
   --input: var(--ibm-gray-90);
-  --ring: var(--ibm-blue-60);
+  --ring: var(--dna-neon-teal);
   --radius: 0.25rem;
 }
 
 @theme inline {
-  --font-sans: 'IBM Plex Sans', 'Geist', system-ui, -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'Geist Mono', 'Courier New', monospace;
+  --font-sans: 'Inter', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
   
   /* IBM color tokens */
   --color-ibm-gray-10: var(--ibm-gray-10);

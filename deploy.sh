@@ -19,7 +19,7 @@ command -v npm >/dev/null 2>&1 || { echo "Error: npm is required but not install
 
 # Step 1: Install dependencies
 echo "→ Step 1: Installing dependencies..."
-npm install
+npm install --legacy-peer-deps
 
 # Step 2: Build for production
 echo ""
