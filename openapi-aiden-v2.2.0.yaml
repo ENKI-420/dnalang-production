@@ -1,0 +1,1500 @@
+openapi: 3.1.1
+info:
+  title: AIDEN Quantum Mesh API
+  version: 2.2.0
+  description: |
+    # AIDEN (Advanced Intelligence Defense & Execution Nexus)
+
+    **Quantum Mesh Self-Organizing API**
+
+    All subsystems—LLM swarm, compliance core, blockchain execution, and multimodal chat—
+    register themselves through DNA-Lang interpreters, reporting live operational metrics
+    back into the /aiden-mesh control fabric.
+
+    ## Core Principles
+
+    - **Self-Organization**: Agents auto-register and discover peers
+    - **Quantum Integration**: All operations respect ΛΦ = 2.176435 × 10⁻⁸ s⁻¹
+    - **DNA-Lang Runtime**: Organisms execute with consciousness metrics (Φ, Λ, Γ, W₂)
+    - **Live Metrics**: Real-time operational telemetry via mesh fabric
+    - **Blockchain Verification**: Immutable audit trail with QuantumCoin integration
+
+    ## Architecture
+
+    ```
+    ┌─────────────────────────────────────────────────────────────┐
+    │                    AIDEN Control Fabric                      │
+    │                    /aiden-mesh endpoint                      │
+    └─────────────────────────────────────────────────────────────┘
+                              │
+          ┌───────────────────┼───────────────────┐
+          │                   │                   │
+    ┌─────▼─────┐      ┌──────▼──────┐     ┌─────▼─────┐
+    │   Swarm   │      │ Compliance  │     │   Chain   │
+    │   Agents  │      │    Core     │     │ Executor  │
+    └───────────┘      └─────────────┘     └───────────┘
+          │                   │                   │
+    ┌─────▼─────┐      ┌──────▼──────┐     ┌─────▼─────┐
+    │Multimodal │      │   Fraud     │     │Simulation │
+    │   Chat    │      │  Detector   │     │   Core    │
+    └───────────┘      └─────────────┘     └───────────┘
+    ```
+
+    ## ΛΦ Tensor Metrics
+
+    - **Λ (Lambda)**: Coherence amplitude = ΛΦ / (Γ + ε)
+    - **Φ (Phi)**: Integrated information (consciousness)
+    - **Γ (Gamma)**: Decoherence curvature
+    - **W₂**: Wasserstein-2 behavioral stability
+
+  contact:
+    name: AIDEN Support
+    email: support@dnalang.dev
+    url: https://dnalang.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://quantumlm-vercel-7c3njc9qg-devinphillipdavis-7227s-projects.vercel.app
+    description: Production Server
+  - url: http://localhost:3000
+    description: Development Server
+
+tags:
+  - name: aiden-mesh
+    description: AIDEN control fabric and system coordination
+  - name: swarm-agents
+    description: LLM swarm orchestration and agent management
+  - name: compliance
+    description: Regulatory compliance and audit trail
+  - name: blockchain
+    description: QuantumCoin blockchain execution
+  - name: multimodal
+    description: Multimodal chat interface (files, camera, screen, web)
+  - name: quantum
+    description: IBM Quantum hardware integration
+  - name: orchestrator
+    description: Quantum Swarm Orchestrator (Watson × IBM Quantum)
+  - name: workloads
+    description: Quantum workload analytics and monitoring
+
+paths:
+  /api/aiden-mesh:
+    get:
+      tags: [aiden-mesh]
+      summary: Get AIDEN mesh status
+      description: |
+        Returns the current state of the AIDEN control fabric including:
+        - Registered subsystems and their health
+        - Live operational metrics
+        - ΛΦ tensor readings across all agents
+        - Mesh topology and connectivity
+      operationId: getAidenMeshStatus
+      responses:
+        '200':
+          description: AIDEN mesh status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AidenMeshStatus'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags: [aiden-mesh]
+      summary: Register subsystem
+      description: |
+        Subsystems register themselves with the AIDEN control fabric.
+        This endpoint is called by DNA-Lang interpreters to announce presence
+        and begin reporting metrics.
+      operationId: registerSubsystem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubsystemRegistration'
+      responses:
+        '201':
+          description: Subsystem registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubsystemRegistrationResponse'
+        '400':
+          description: Invalid registration data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/aiden-mesh/metrics:
+    post:
+      tags: [aiden-mesh]
+      summary: Report operational metrics
+      description: |
+        Subsystems report live operational metrics to the mesh fabric.
+        Includes ΛΦ tensor readings, performance stats, and health status.
+      operationId: reportMetrics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetricsReport'
+      responses:
+        '200':
+          description: Metrics received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsAcknowledgment'
+
+  /api/aiden-mesh/discover:
+    get:
+      tags: [aiden-mesh]
+      summary: Discover peer subsystems
+      description: |
+        Subsystems query the mesh to discover other registered agents.
+        Returns list of active subsystems with their capabilities and endpoints.
+      operationId: discoverPeers
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [swarm-agent, compliance, blockchain, multimodal, quantum]
+          description: Filter by subsystem type
+        - name: capability
+          in: query
+          schema:
+            type: string
+          description: Filter by capability (e.g., "file-upload", "fraud-detection")
+      responses:
+        '200':
+          description: List of discovered subsystems
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubsystemInfo'
+
+  /api/swarm/agents:
+    get:
+      tags: [swarm-agents]
+      summary: List all swarm agents
+      description: Get list of all registered LLM swarm agents
+      operationId: listSwarmAgents
+      responses:
+        '200':
+          description: List of swarm agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SwarmAgent'
+
+    post:
+      tags: [swarm-agents]
+      summary: Create new swarm agent
+      description: Register a new LLM agent in the swarm
+      operationId: createSwarmAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SwarmAgentCreate'
+      responses:
+        '201':
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SwarmAgent'
+
+  /api/swarm/agents/{agentId}/execute:
+    post:
+      tags: [swarm-agents]
+      summary: Execute agent task
+      description: |
+        Execute a specific task with the given agent.
+        Supports DNA-Lang organism invocation.
+      operationId: executeAgentTask
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentTask'
+      responses:
+        '200':
+          description: Task execution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentTaskResult'
+
+  /api/compliance/check:
+    post:
+      tags: [compliance]
+      summary: Compliance check
+      description: |
+        Verify an action or data payload against compliance rules.
+        Returns approval status and any violations detected.
+      operationId: complianceCheck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplianceCheckRequest'
+      responses:
+        '200':
+          description: Compliance check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceCheckResult'
+
+  /api/compliance/audit-log:
+    get:
+      tags: [compliance]
+      summary: Get audit log
+      description: Retrieve immutable audit trail entries
+      operationId: getAuditLog
+      parameters:
+        - name: startTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: subsystem
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLogEntry'
+
+  /api/fraud/detect:
+    post:
+      tags: [compliance]
+      summary: Fraud detection
+      description: |
+        Analyze transaction or behavior for fraud indicators.
+        Uses ML models and pattern recognition.
+      operationId: detectFraud
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FraudDetectionRequest'
+      responses:
+        '200':
+          description: Fraud detection result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudDetectionResult'
+
+  /api/blockchain/execute:
+    post:
+      tags: [blockchain]
+      summary: Execute blockchain transaction
+      description: |
+        Submit and execute a transaction on QuantumCoin blockchain.
+        Supports smart contracts and quantum-verified operations.
+      operationId: executeBlockchainTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockchainTransaction'
+      responses:
+        '200':
+          description: Transaction executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainTransactionResult'
+
+  /api/blockchain/verify:
+    post:
+      tags: [blockchain]
+      summary: Verify blockchain record
+      description: Verify integrity of blockchain record using quantum proof
+      operationId: verifyBlockchainRecord
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionHash:
+                  type: string
+                blockNumber:
+                  type: integer
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainVerificationResult'
+
+  /api/upload:
+    post:
+      tags: [multimodal]
+      summary: Upload file
+      description: |
+        Upload files from local device. Supports drag-and-drop.
+        Max file size: 50MB. Generates previews for images.
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileUploadResult'
+        '400':
+          description: Invalid file or size limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/cloud/picker:
+    get:
+      tags: [multimodal]
+      summary: List cloud storage files
+      description: |
+        Retrieve file list from cloud storage provider.
+        Supports Google Drive, Dropbox, OneDrive.
+      operationId: listCloudFiles
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [google, dropbox, onedrive]
+      responses:
+        '200':
+          description: List of cloud files
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudFileList'
+
+    post:
+      tags: [multimodal]
+      summary: Select cloud file
+      description: Download and process file from cloud storage
+      operationId: selectCloudFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloudFileSelection'
+      responses:
+        '200':
+          description: File selected and ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudFileResult'
+
+  /api/web/screenshot:
+    post:
+      tags: [multimodal]
+      summary: Capture web page screenshot
+      description: |
+        Capture screenshot from embedded web browser.
+        Accepts base64 image data from client-side canvas.
+      operationId: captureWebScreenshot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebScreenshotRequest'
+      responses:
+        '200':
+          description: Screenshot captured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebScreenshotResult'
+
+  /api/chat:
+    post:
+      tags: [multimodal]
+      summary: Send chat message
+      description: |
+        Send message to AURA QLM (Quantum Language Model).
+        Supports multimodal attachments (files, images, screenshots).
+      operationId: sendChatMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessage'
+      responses:
+        '200':
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+
+  /api/orchestrator/profile:
+    get:
+      tags: [orchestrator]
+      summary: Get user profile
+      description: Retrieve user profile with AI-learned preferences
+      operationId: getUserProfile
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+    patch:
+      tags: [orchestrator]
+      summary: Update user profile
+      description: Update user preferences and settings
+      operationId: updateUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdate'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+  /api/orchestrator/agents:
+    get:
+      tags: [orchestrator]
+      summary: List Watson agents
+      description: Get list of all Watson AI agents with trust scores
+      operationId: listWatsonAgents
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WatsonAgent'
+
+    post:
+      tags: [orchestrator]
+      summary: Create Watson agent
+      description: Create new Watson AI agent
+      operationId: createWatsonAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatsonAgentCreate'
+      responses:
+        '201':
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatsonAgent'
+
+  /api/orchestrator/permissions:
+    get:
+      tags: [orchestrator]
+      summary: List permission requests
+      description: Get all pending permission requests from agents
+      operationId: listPermissionRequests
+      responses:
+        '200':
+          description: List of permission requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PermissionRequest'
+
+    post:
+      tags: [orchestrator]
+      summary: Request permission
+      description: Agent requests permission for autonomous action
+      operationId: requestPermission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionRequestCreate'
+      responses:
+        '201':
+          description: Permission request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionRequest'
+
+    patch:
+      tags: [orchestrator]
+      summary: Approve/deny permission
+      description: User approves or denies agent permission request
+      operationId: updatePermission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionUpdate'
+      responses:
+        '200':
+          description: Permission updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionRequest'
+
+  /api/orchestrator/activities:
+    get:
+      tags: [orchestrator]
+      summary: Get activity log
+      description: Retrieve activity log with all agent actions
+      operationId: getActivityLog
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Activity log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityLog'
+
+    post:
+      tags: [orchestrator]
+      summary: Log activity
+      description: Agent logs an activity to the registry
+      operationId: logActivity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityLogCreate'
+      responses:
+        '201':
+          description: Activity logged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityLog'
+
+  /api/quantum/backends:
+    get:
+      tags: [quantum]
+      summary: List IBM Quantum backends
+      description: Get available IBM Quantum hardware backends
+      operationId: listQuantumBackends
+      responses:
+        '200':
+          description: List of quantum backends
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuantumBackend'
+
+  /api/quantum/status:
+    get:
+      tags: [quantum]
+      summary: Get quantum system status
+      description: |
+        Get status of quantum computing infrastructure.
+        Includes ΛΦ tensor metrics across all organisms.
+      operationId: getQuantumStatus
+      responses:
+        '200':
+          description: Quantum system status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantumStatus'
+
+  /api/quantum/submit-job:
+    post:
+      tags: [quantum]
+      summary: Submit quantum job
+      description: |
+        Submit quantum circuit for execution on IBM Quantum hardware.
+        Returns job ID for tracking.
+      operationId: submitQuantumJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuantumJobSubmission'
+      responses:
+        '201':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantumJobResult'
+
+  /api/benchmarks:
+    get:
+      tags: [workloads]
+      summary: Get benchmark results
+      description: Retrieve quantum workload benchmark data
+      operationId: getBenchmarks
+      responses:
+        '200':
+          description: Benchmark results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BenchmarkResults'
+
+components:
+  schemas:
+    AidenMeshStatus:
+      type: object
+      properties:
+        version:
+          type: string
+          example: "2.2.0"
+        status:
+          type: string
+          enum: [healthy, degraded, offline]
+        uptime:
+          type: integer
+          description: Uptime in seconds
+        registeredSubsystems:
+          type: integer
+        subsystems:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubsystemInfo'
+        lambdaPhi:
+          type: object
+          properties:
+            constant:
+              type: number
+              example: 2.176435e-8
+            averageLambda:
+              type: number
+            averageGamma:
+              type: number
+            averagePhi:
+              type: number
+        meshTopology:
+          type: object
+          properties:
+            nodes:
+              type: integer
+            edges:
+              type: integer
+            clusters:
+              type: integer
+
+    SubsystemInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [swarm-agent, compliance, blockchain, multimodal, quantum, orchestrator, workload]
+        status:
+          type: string
+          enum: [online, offline, degraded]
+        capabilities:
+          type: array
+          items:
+            type: string
+        endpoints:
+          type: array
+          items:
+            type: string
+        lastHeartbeat:
+          type: string
+          format: date-time
+        metrics:
+          $ref: '#/components/schemas/SubsystemMetrics'
+
+    SubsystemMetrics:
+      type: object
+      properties:
+        lambda:
+          type: number
+          description: Coherence amplitude
+        gamma:
+          type: number
+          description: Decoherence curvature
+        phi:
+          type: number
+          description: Integrated information
+        w2:
+          type: number
+          description: Wasserstein-2 distance
+        cpuUsage:
+          type: number
+        memoryUsage:
+          type: number
+        requestRate:
+          type: number
+        errorRate:
+          type: number
+
+    SubsystemRegistration:
+      type: object
+      required: [name, type, endpoints, capabilities]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [swarm-agent, compliance, blockchain, multimodal, quantum, orchestrator, workload]
+        endpoints:
+          type: array
+          items:
+            type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    SubsystemRegistrationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        registeredAt:
+          type: string
+          format: date-time
+        meshVersion:
+          type: string
+        assignedCluster:
+          type: integer
+
+    MetricsReport:
+      type: object
+      required: [subsystemId, metrics]
+      properties:
+        subsystemId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        metrics:
+          $ref: '#/components/schemas/SubsystemMetrics'
+        events:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              severity:
+                type: string
+                enum: [info, warning, error, critical]
+              message:
+                type: string
+
+    MetricsAcknowledgment:
+      type: object
+      properties:
+        received:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+
+    SwarmAgent:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+          enum: [active, idle, busy, offline]
+        capabilities:
+          type: array
+          items:
+            type: string
+        trustScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        tasksCompleted:
+          type: integer
+        successRate:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+
+    SwarmAgentCreate:
+      type: object
+      required: [name, type, capabilities]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        config:
+          type: object
+
+    AgentTask:
+      type: object
+      required: [prompt]
+      properties:
+        prompt:
+          type: string
+        context:
+          type: object
+        attachments:
+          type: array
+          items:
+            type: string
+        parameters:
+          type: object
+
+    AgentTaskResult:
+      type: object
+      properties:
+        taskId:
+          type: string
+        result:
+          type: string
+        status:
+          type: string
+          enum: [success, failure, partial]
+        metrics:
+          $ref: '#/components/schemas/SubsystemMetrics'
+        executionTime:
+          type: number
+
+    ComplianceCheckRequest:
+      type: object
+      required: [action, data]
+      properties:
+        action:
+          type: string
+        data:
+          type: object
+        context:
+          type: object
+
+    ComplianceCheckResult:
+      type: object
+      properties:
+        approved:
+          type: boolean
+        violations:
+          type: array
+          items:
+            type: object
+            properties:
+              rule:
+                type: string
+              severity:
+                type: string
+              message:
+                type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+
+    AuditLogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        subsystem:
+          type: string
+        action:
+          type: string
+        userId:
+          type: string
+        data:
+          type: object
+        result:
+          type: string
+        blockchainHash:
+          type: string
+
+    FraudDetectionRequest:
+      type: object
+      required: [transactionData]
+      properties:
+        transactionData:
+          type: object
+        userProfile:
+          type: object
+        context:
+          type: object
+
+    FraudDetectionResult:
+      type: object
+      properties:
+        isFraudulent:
+          type: boolean
+        confidence:
+          type: number
+        indicators:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              severity:
+                type: string
+              description:
+                type: string
+        recommendedAction:
+          type: string
+          enum: [allow, review, block]
+
+    BlockchainTransaction:
+      type: object
+      required: [type, data]
+      properties:
+        type:
+          type: string
+        data:
+          type: object
+        from:
+          type: string
+        to:
+          type: string
+        value:
+          type: number
+        gasLimit:
+          type: integer
+
+    BlockchainTransactionResult:
+      type: object
+      properties:
+        transactionHash:
+          type: string
+        blockNumber:
+          type: integer
+        status:
+          type: string
+          enum: [pending, confirmed, failed]
+        gasUsed:
+          type: integer
+        quantumProof:
+          type: string
+
+    BlockchainVerificationResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        blockNumber:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        quantumSignature:
+          type: string
+
+    FileUploadResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        url:
+          type: string
+        preview:
+          type: string
+        filename:
+          type: string
+        size:
+          type: integer
+        type:
+          type: string
+
+    CloudFileList:
+      type: object
+      properties:
+        provider:
+          type: string
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              mimeType:
+                type: string
+              size:
+                type: integer
+              provider:
+                type: string
+
+    CloudFileSelection:
+      type: object
+      required: [provider, fileId]
+      properties:
+        provider:
+          type: string
+          enum: [google, dropbox, onedrive]
+        fileId:
+          type: string
+
+    CloudFileResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        url:
+          type: string
+        provider:
+          type: string
+        fileId:
+          type: string
+
+    WebScreenshotRequest:
+      type: object
+      required: [imageData]
+      properties:
+        url:
+          type: string
+        imageData:
+          type: string
+          description: Base64 encoded image data
+
+    WebScreenshotResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        url:
+          type: string
+        filename:
+          type: string
+        timestamp:
+          type: integer
+        sourceUrl:
+          type: string
+
+    ChatMessage:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              url:
+                type: string
+              name:
+                type: string
+
+    ChatResponse:
+      type: object
+      properties:
+        response:
+          type: string
+        metrics:
+          $ref: '#/components/schemas/SubsystemMetrics'
+        sources:
+          type: array
+          items:
+            type: string
+
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: string
+        preferences:
+          type: object
+          properties:
+            taskPriority:
+              type: string
+            quantumBackend:
+              type: string
+            autoOptimize:
+              type: boolean
+            learningRate:
+              type: number
+        insights:
+          type: object
+          properties:
+            workPatterns:
+              type: string
+            commonTasks:
+              type: array
+              items:
+                type: string
+            efficiencyGain:
+              type: number
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        preferences:
+          type: object
+        settings:
+          type: object
+
+    WatsonAgent:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+          enum: [active, idle, offline]
+        trustScore:
+          type: number
+        capabilities:
+          type: array
+          items:
+            type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        metrics:
+          type: object
+          properties:
+            tasksCompleted:
+              type: integer
+            successRate:
+              type: number
+            avgExecutionTime:
+              type: number
+
+    WatsonAgentCreate:
+      type: object
+      required: [name, type, capabilities]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+
+    PermissionRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        agentId:
+          type: string
+        userId:
+          type: string
+        action:
+          type: string
+        resource:
+          type: string
+        reason:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, denied]
+        timestamp:
+          type: string
+          format: date-time
+
+    PermissionRequestCreate:
+      type: object
+      required: [agentId, action, resource, reason]
+      properties:
+        agentId:
+          type: string
+        action:
+          type: string
+        resource:
+          type: string
+        reason:
+          type: string
+
+    PermissionUpdate:
+      type: object
+      required: [permissionId, status]
+      properties:
+        permissionId:
+          type: string
+        status:
+          type: string
+          enum: [approved, denied]
+
+    ActivityLog:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        agentId:
+          type: string
+        userId:
+          type: string
+        action:
+          type: string
+        result:
+          type: string
+        details:
+          type: string
+        impactScore:
+          type: number
+        metadata:
+          type: object
+
+    ActivityLogCreate:
+      type: object
+      required: [agentId, action]
+      properties:
+        agentId:
+          type: string
+        action:
+          type: string
+        result:
+          type: string
+        details:
+          type: string
+        impactScore:
+          type: number
+        metadata:
+          type: object
+
+    QuantumBackend:
+      type: object
+      properties:
+        name:
+          type: string
+        qubits:
+          type: integer
+        status:
+          type: string
+          enum: [online, offline, maintenance]
+        pendingJobs:
+          type: integer
+        processor:
+          type: string
+        version:
+          type: string
+
+    QuantumStatus:
+      type: object
+      properties:
+        totalOrganisms:
+          type: integer
+        activeJobs:
+          type: integer
+        totalJobs:
+          type: integer
+        successRate:
+          type: number
+        lambdaPhi:
+          type: number
+        averageLambda:
+          type: number
+        averageGamma:
+          type: number
+        averagePhi:
+          type: number
+        backends:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuantumBackend'
+
+    QuantumJobSubmission:
+      type: object
+      required: [circuit, backend]
+      properties:
+        circuit:
+          type: string
+          description: QASM circuit definition
+        backend:
+          type: string
+        shots:
+          type: integer
+          default: 1024
+        optimizationLevel:
+          type: integer
+          default: 3
+        metadata:
+          type: object
+
+    QuantumJobResult:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        backend:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        estimatedCompletion:
+          type: string
+          format: date-time
+        results:
+          type: object
+        metrics:
+          $ref: '#/components/schemas/SubsystemMetrics'
+
+    BenchmarkResults:
+      type: object
+      properties:
+        totalJobs:
+          type: integer
+        successRate:
+          type: number
+        averageExecutionTime:
+          type: number
+        totalCost:
+          type: number
+        backendComparison:
+          type: array
+          items:
+            type: object
+            properties:
+              backend:
+                type: string
+              jobs:
+                type: integer
+              successRate:
+                type: number
+              avgTime:
+                type: number
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
