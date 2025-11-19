@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  dnalang-api:
+    build: .
+    container_name: dnalang-orchestrator-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DNA_LANG_API_KEY=${DNA_LANG_API_KEY}
+      - IBM_QUANTUM_TOKEN=${IBM_QUANTUM_TOKEN}
+      - IBM_WATSONX_API_KEY=${IBM_WATSONX_API_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - dnalang-network
+
+networks:
+  dnalang-network:
+    driver: bridge
