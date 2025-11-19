@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase/client'
 import { requestPermission, updatePermission } from '@/lib/watsonx/client'
+
+// Dynamic import to avoid build-time errors
+function getSupabase() {
+  const { supabase } = require('@/lib/supabase/client')
+  return supabase
+}
 
 export async function GET(request: NextRequest) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await getSupabase().auth.getUser()
 
     if (!user) {
       return NextResponse.json(
@@ -44,7 +49,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await getSupabase().auth.getUser()
 
     if (!user) {
       return NextResponse.json(
@@ -75,7 +80,7 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await getSupabase().auth.getUser()
 
     if (!user) {
       return NextResponse.json(

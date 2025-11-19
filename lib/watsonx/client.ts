@@ -3,7 +3,15 @@
  * Connects DNA-Lang organisms to IBM Cloud services
  */
 
-import { supabase } from '@/lib/supabase/client'
+// Note: Supabase import moved to function level to avoid build-time initialization
+// import { supabase } from '@/lib/supabase/client'
+
+// Helper to get Supabase client dynamically
+function getSupabase() {
+  // Dynamically import to avoid build-time initialization errors
+  const { supabase } = require('@/lib/supabase/client')
+  return supabase
+}
 
 // IBM Watsonx Configuration
 const WATSONX_CONFIG = {

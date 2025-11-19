@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase/client'
 import { getActivityLogs, logActivity } from '@/lib/watsonx/client'
 import type { ActivityLog } from '@/lib/watsonx/client'
 
+// Dynamic import to avoid build-time errors
+function getSupabase() {
+  const { supabase } = require('@/lib/supabase/client')
+  return supabase
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await getSupabase().auth.getUser()
 
     if (!user) {
       return NextResponse.json(
@@ -31,7 +36,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await getSupabase().auth.getUser()
 
     if (!user) {
       return NextResponse.json(
