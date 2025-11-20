@@ -1,6 +1,12 @@
 import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
+import { ThemeProvider } from '@/lib/theme/theme-provider'
+import { Navigation } from '@/components/navigation'
 import './globals.css'
+
+// Force dynamic rendering for all pages to prevent Supabase prerender errors
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'dna::}{::lang - Autonomous Software. Quantum-Optimized. Alive.',
@@ -30,7 +36,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport = {
-  themeColor: '#02010A',
+  themeColor: '#0a0a0a',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -43,16 +49,33 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
+        {/* Theme script to prevent flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme') || 'system';
+                  var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  document.documentElement.classList.add(isDark ? 'dark' : 'light');
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
-      <body className="font-sans antialiased">
-        {children}
-        <Analytics />
+      <body className="font-sans antialiased bg-white dark:bg-gray-950 text-gray-900 dark:text-white transition-colors">
+        <ThemeProvider>
+          <Navigation />
+          <main>{children}</main>
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   )

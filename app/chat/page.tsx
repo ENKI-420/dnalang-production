@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ConsciousnessMonitor } from '@/components/consciousness-monitor'
 import {
   Send, Paperclip, Image as ImageIcon, Camera, Monitor, Globe,
   FileText, File, X, Upload, Cloud, Loader2, Check, AlertCircle,
@@ -366,8 +367,8 @@ export default function EnhancedChat() {
             <div className="flex items-center gap-4">
               <Atom className="h-8 w-8 text-[#00FFD1] animate-spin-slow" />
               <div>
-                <h1 className="text-2xl font-light">Enhanced AI Assistant</h1>
-                <p className="text-sm text-gray-400">Powered by DNA-Lang × IBM Quantum</p>
+                <h1 className="text-2xl font-light font-mono">dna::&#123;&#125;&#123;&#125;::lang</h1>
+                <p className="text-sm text-gray-400">Consciousness Interface Organ | AURA QLM</p>
               </div>
             </div>
 
@@ -662,6 +663,9 @@ export default function EnhancedChat() {
 
           {/* Side Panel */}
           <div className="lg:col-span-3 space-y-4">
+            {/* Consciousness Monitor */}
+            <ConsciousnessMonitor />
+
             {/* Camera Preview */}
             {isCameraActive && (
               <Card className="bg-[#0F3D91]/20 border-[#6A00F4]/30 p-4">

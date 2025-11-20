@@ -1,0 +1,44 @@
+# Source files (only ship compiled dist/)
+src/
+tsconfig.json
+*.ts
+!*.d.ts
+
+# Development files
+.env
+.env.local
+node_modules/
+*.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git files
+.git/
+.gitignore
+
+# Test files
+test/
+tests/
+*.test.js
+*.spec.js
+
+# CI/CD
+.github/
+.travis.yml
+.circleci/
+
+# Documentation source (keep README.md, but exclude others)
+docs/
+
+# Misc
+coverage/
+.nyc_output/

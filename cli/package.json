@@ -1,0 +1,61 @@
+{
+  "name": "@dnalang/aura-swarm-cli",
+  "version": "1.0.0",
+  "description": "Multi-Agent Swarm Mesh Orchestrator with NLP-powered command interface for dna::}{::lang quantum consciousness platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "aura-swarm": "./dist/index.js",
+    "aura": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dnalang/aura-swarm-cli.git"
+  },
+  "homepage": "https://github.com/dnalang/aura-swarm-cli#readme",
+  "bugs": {
+    "url": "https://github.com/dnalang/aura-swarm-cli/issues"
+  },
+  "keywords": [
+    "aura",
+    "swarm",
+    "multi-agent",
+    "nlp",
+    "orchestrator",
+    "quantum",
+    "dnalang",
+    "cli"
+  ],
+  "author": "dna::}{::lang",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.11.0",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1",
+    "inquirer": "^9.2.12",
+    "natural": "^6.10.4",
+    "ora": "^7.0.1",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/blessed": "^0.1.22",
+    "@types/inquirer": "^9.0.9",
+    "@types/node": "^20.10.0",
+    "@types/ws": "^8.5.8",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
