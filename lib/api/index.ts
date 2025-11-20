@@ -1,10 +1,13 @@
 // lib/api/index.ts
 // Central API exports for DNA::}{::lang Multi-User Platform
+// CLIENT-SIDE ONLY - Do not import in server components
+
+'use client'
 
 // ============================================================================
-// AUTHENTICATION API
+// IMPORTS
 // ============================================================================
-export {
+import {
   authAPI,
   validateEmail,
   validatePassword,
@@ -15,10 +18,7 @@ export {
   type AuthSession,
 } from './auth'
 
-// ============================================================================
-// PROFILE API
-// ============================================================================
-export {
+import {
   profileAPI,
   validateBio,
   validateURL,
@@ -27,10 +27,7 @@ export {
   type ProfileUpdatePayload,
 } from './profiles'
 
-// ============================================================================
-// QUANTUM STATS API
-// ============================================================================
-export {
+import {
   quantumStatsAPI,
   formatStatValue,
   getBadgeTierColor,
@@ -44,10 +41,7 @@ export {
   type AchievementDefinition,
 } from './quantum-stats'
 
-// ============================================================================
-// ACTIVITIES & COMMENTS API
-// ============================================================================
-export {
+import {
   activitiesAPI,
   commentsAPI,
   formatActivityTime,
@@ -61,10 +55,7 @@ export {
   type ActivityFeedOptions,
 } from './activities'
 
-// ============================================================================
-// TOKENOMICS & NFT API
-// ============================================================================
-export {
+import {
   walletAPI,
   tokenBalanceAPI,
   nftAPI,
@@ -81,6 +72,81 @@ export {
   type TokenBalance,
   type MintNFTPayload,
 } from './tokenomics'
+
+// ============================================================================
+// RE-EXPORTS
+// ============================================================================
+
+// Authentication
+export {
+  authAPI,
+  validateEmail,
+  validatePassword,
+  validateUsername,
+  type RegisterPayload,
+  type LoginPayload,
+  type User,
+  type AuthSession,
+}
+
+// Profiles
+export {
+  profileAPI,
+  validateBio,
+  validateURL,
+  formatProfileForDisplay,
+  type UserProfile,
+  type ProfileUpdatePayload,
+}
+
+// Quantum Stats
+export {
+  quantumStatsAPI,
+  formatStatValue,
+  getBadgeTierColor,
+  getBadgeTierPriority,
+  calculateAchievementProgress,
+  getMetricDisplayName,
+  calculateStatsSummary,
+  type QuantumStats,
+  type Achievement,
+  type LeaderboardEntry,
+  type AchievementDefinition,
+}
+
+// Activities & Comments
+export {
+  activitiesAPI,
+  commentsAPI,
+  formatActivityTime,
+  getActivityIcon,
+  getReactionEmoji,
+  validateCommentText,
+  parseActivityMetadata,
+  type UserActivity,
+  type ExperimentComment,
+  type CommentReaction,
+  type ActivityFeedOptions,
+}
+
+// Tokenomics & NFT
+export {
+  walletAPI,
+  tokenBalanceAPI,
+  nftAPI,
+  formatWalletAddress,
+  validateWalletAddress,
+  getBlockchainExplorerURL,
+  getIPFSUrl,
+  formatTokenAmount,
+  estimateTransactionFee,
+  getTransactionStatusColor,
+  generateNFTMetadataJSON,
+  type WalletTransaction,
+  type NFTMetadata,
+  type TokenBalance,
+  type MintNFTPayload,
+}
 
 // ============================================================================
 // CONVENIENCE EXPORTS
