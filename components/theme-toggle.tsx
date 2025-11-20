@@ -9,7 +9,18 @@ import { useTheme } from '@/lib/theme/theme-provider'
 import { Sun, Moon, Monitor } from 'lucide-react'
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  // Safely check if we're in the ThemeProvider context
+  let theme: 'light' | 'dark' | 'system' = 'system'
+  let setTheme: (theme: 'light' | 'dark' | 'system') => void = () => {}
+
+  try {
+    const context = useTheme()
+    theme = context.theme
+    setTheme = context.setTheme
+  } catch (error) {
+    // Not in ThemeProvider context, use defaults
+    console.warn('ThemeToggle used outside ThemeProvider')
+  }
 
   const themes = [
     { value: 'light', icon: Sun, label: 'Light' },
@@ -44,7 +55,20 @@ export function ThemeToggle() {
 }
 
 export function ThemeToggleCompact() {
-  const { theme, effectiveTheme, setTheme } = useTheme()
+  // Safely check if we're in the ThemeProvider context
+  let theme: 'light' | 'dark' | 'system' = 'system'
+  let effectiveTheme: 'light' | 'dark' = 'dark'
+  let setTheme: (theme: 'light' | 'dark' | 'system') => void = () => {}
+
+  try {
+    const context = useTheme()
+    theme = context.theme
+    effectiveTheme = context.effectiveTheme
+    setTheme = context.setTheme
+  } catch (error) {
+    // Not in ThemeProvider context, use defaults
+    console.warn('ThemeToggleCompact used outside ThemeProvider')
+  }
 
   const cycleTheme = () => {
     const themes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system']
