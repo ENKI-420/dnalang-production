@@ -1,0 +1,130 @@
+[tool.black]
+line-length = 100
+target-version = ['py310']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | __pycache__
+  | \.pytest_cache
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+split_on_trailing_comma = true
+known_third_party = ["qiskit", "qiskit_aer", "qiskit_algorithms", "numpy", "scipy"]
+known_first_party = ["quantum_vqe_executor", "tests"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow",
+    "integration: integration tests",
+    "unit: unit tests",
+    "hardware: requires real quantum hardware",
+    "smoke: smoke tests",
+    "provenance: provenance validation tests"
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    ".venv/*",
+    "tests/*",
+    "setup.py",
+    "*/__pycache__/*"
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod"
+]
+
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quantum-aura-orchestrator"
+version = "1.0.0"
+description = "Production-ready VQE executor with provenance tracking"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "ENKI-420", email = "enki420@agiledefensesystems.com"}
+]
+keywords = ["quantum", "VQE", "provenance", "qiskit", "consciousness"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Physics"
+]
+
+dependencies = [
+    "qiskit>=1.0.0",
+    "qiskit-aer>=0.13.0",
+    "qiskit-algorithms>=0.3.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-timeout>=2.1.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "flake8>=6.1.0",
+    "mypy>=1.5.0"
+]
+hardware = [
+    "qiskit-ibm-runtime>=0.18.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/ENKI-420/quantum-aura-orchestrator"
+Documentation = "https://github.com/ENKI-420/quantum-aura-orchestrator#readme"
+Repository = "https://github.com/ENKI-420/quantum-aura-orchestrator.git"
+"Bug Tracker" = "https://github.com/ENKI-420/quantum-aura-orchestrator/issues"

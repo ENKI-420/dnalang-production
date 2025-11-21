@@ -5,9 +5,11 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install --legacy-peer-deps",
   "env": {
-    "QUANTUM_API_URL": "https://api.dnalang.dev"
+    "QUANTUM_API_URL": "https://api.dnalang.dev",
+    "NEXT_PUBLIC_APP_URL": "https://www.dnalang.dev",
+    "NEXT_PUBLIC_LAMBDA_PHI": "2.176435e-8"
   },
-  "regions": ["iad1"],
+  "regions": ["iad1", "sfo1"],
   "rewrites": [
     {
       "source": "/api/:path*",

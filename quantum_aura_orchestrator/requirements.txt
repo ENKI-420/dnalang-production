@@ -1,0 +1,35 @@
+# DNALang Quantum Aura Orchestrator - Dependencies
+# Production-ready VQE executor with provenance tracking
+
+# Core Quantum Computing
+qiskit>=1.0.0
+qiskit-aer>=0.13.0
+qiskit-algorithms>=0.3.0
+qiskit-ibm-runtime>=0.18.0  # Optional: for IBM Quantum hardware
+
+# Scientific Computing
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-timeout>=2.1.0
+
+# Type Checking and Linting
+mypy>=1.5.0
+black>=23.7.0
+flake8>=6.1.0
+isort>=5.12.0
+
+# Utilities
+python-dateutil>=2.8.2
+typing-extensions>=4.7.0
+
+# Optional: Monitoring and Observability
+# prometheus-client>=0.17.0
+# opentelemetry-api>=1.20.0
+
+# Development
+ipython>=8.14.0
+jupyter>=1.0.0

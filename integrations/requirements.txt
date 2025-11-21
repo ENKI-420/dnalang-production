@@ -1,0 +1,23 @@
+# DNALang Quantum Integrations Requirements
+# Python dependencies for QuantumComm, Z3BRA Bridge, and QuantumCoin
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+python-multipart>=0.0.6
+
+# Quantum Computing
+qiskit>=1.0.0
+qiskit-aer>=0.13.0
+qiskit-ibm-runtime>=0.18.0
+
+# Utilities
+numpy>=1.24.0
+python-dateutil>=2.8.2
+
+# Logging & Monitoring
+python-json-logger>=2.0.7
+
+# Optional: Android Bridge
+# adb-shell>=0.4.3  # Uncomment if using ADB

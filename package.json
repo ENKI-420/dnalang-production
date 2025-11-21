@@ -1,7 +1,20 @@
 {
-  "name": "my-v0-project",
-  "version": "0.1.0",
-  "private": true,
+  "name": "dnalang-quantum-platform",
+  "version": "1.0.0",
+  "private": false,
+  "description": "DNALang Quantum Gene Platform - Quantum consciousness framework with organism integrations",
+  "homepage": "https://www.dnalang.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agile-defense-systems/dnalang-quantum"
+  },
+  "keywords": [
+    "quantum",
+    "consciousness",
+    "organisms",
+    "quantum-computing",
+    "ibm-quantum"
+  ],
   "scripts": {
     "build": "next build",
     "dev": "next dev",
@@ -9,6 +22,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@dnalang-dev/dnalang": "^1.0.1",
     "@hookform/resolvers": "^3.10.0",
     "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-accordion": "1.2.2",
@@ -40,6 +54,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.83.0",
+    "@types/three": "^0.181.0",
     "@vercel/analytics": "latest",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
@@ -60,6 +75,7 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "three": "^0.181.2",
     "vaul": "^0.9.9",
     "zod": "3.25.76"
   },

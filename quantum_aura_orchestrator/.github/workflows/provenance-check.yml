@@ -1,0 +1,78 @@
+name: Provenance Verification
+
+on:
+  workflow_run:
+    workflows: ["Quantum VQE CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+  verify-provenance:
+    name: Verify Provenance Bundles
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download provenance artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: provenance-py3.10
+          path: ./provenance
+
+      - name: Verify provenance integrity
+        run: |
+          echo "## Provenance Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          for file in provenance/*.json; do
+            if [ -f "$file" ]; then
+              echo "### $(basename $file)" >> $GITHUB_STEP_SUMMARY
+
+              # Extract key fields
+              git_sha=$(jq -r '.git_sha' "$file")
+              timestamp=$(jq -r '.timestamp' "$file")
+              test_status=$(jq -r '.test_status' "$file")
+
+              echo "- **Git SHA:** $git_sha" >> $GITHUB_STEP_SUMMARY
+              echo "- **Timestamp:** $timestamp" >> $GITHUB_STEP_SUMMARY
+              echo "- **Test Status:** $test_status" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+
+              # Verify git SHA matches
+              if [ "$git_sha" == "${{ github.event.workflow_run.head_sha }}" ]; then
+                echo "✅ Git SHA verified" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "❌ Git SHA mismatch!" >> $GITHUB_STEP_SUMMARY
+              fi
+            fi
+          done
+
+      - name: Archive provenance
+        run: |
+          mkdir -p provenance-archive
+          tar -czf provenance-archive/provenance-${{ github.event.workflow_run.id }}.tar.gz provenance/
+
+      - name: Upload archived provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: provenance-archive-${{ github.event.workflow_run.id }}
+          path: provenance-archive/*.tar.gz
+          retention-days: 365  # Keep for 1 year
+
+  notify:
+    name: Notification
+    runs-on: ubuntu-latest
+    needs: verify-provenance
+    if: always()
+
+    steps:
+      - name: Send summary
+        run: |
+          echo "Provenance verification complete"
+          echo "Workflow run: ${{ github.event.workflow_run.id }}"
+          echo "Status: ${{ needs.verify-provenance.result }}"

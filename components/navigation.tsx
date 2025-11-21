@@ -8,7 +8,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, User, Settings, LogOut, Activity, Zap, Shield, Code2 } from 'lucide-react'
+import { Menu, X, User, Settings, LogOut, Activity, Zap, Shield, Code2, Leaf, Heart, Scale, ShieldCheck, Building, ChevronDown } from 'lucide-react'
 import { ThemeToggleCompact } from './theme-toggle'
 import { authAPI } from '@/lib/api'
 
@@ -17,6 +17,7 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showPortalsMenu, setShowPortalsMenu] = useState(false)
 
   useEffect(() => {
     // Check if user is logged in
@@ -30,6 +31,14 @@ export function Navigation() {
     }
     checkAuth()
   }, [])
+
+  const portalLinks = [
+    { href: '/portals/environmental', label: 'Environmental', icon: Leaf, color: 'from-green-600 to-blue-600' },
+    { href: '/portals/medical', label: 'Medical', icon: Heart, color: 'from-blue-600 to-purple-600' },
+    { href: '/portals/legal', label: 'Legal', icon: Scale, color: 'from-amber-600 to-orange-600' },
+    { href: '/portals/military', label: 'Military', icon: ShieldCheck, color: 'from-red-600 to-slate-600' },
+    { href: '/portals/enterprise', label: 'Enterprise', icon: Building, color: 'from-indigo-600 to-purple-600' },
+  ]
 
   const navLinks = [
     { href: '/', label: 'Home', icon: Zap },
@@ -74,6 +83,66 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
+            {/* Portals Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowPortalsMenu(!showPortalsMenu)}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+                  transition-all duration-200
+                  ${
+                    pathname.startsWith('/portals')
+                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:text-purple-300'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }
+                `}
+              >
+                <Activity className="w-4 h-4" />
+                Portals
+                <ChevronDown className={`w-4 h-4 transition-transform ${showPortalsMenu ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Portals Dropdown Menu */}
+              {showPortalsMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowPortalsMenu(false)}
+                  />
+                  <div className="absolute left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50">
+                    {portalLinks.map((portal) => {
+                      const Icon = portal.icon
+                      return (
+                        <Link
+                          key={portal.href}
+                          href={portal.href}
+                          className={`
+                            flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-700
+                            ${isActive(portal.href) ? 'bg-gray-50 dark:bg-gray-700/50' : ''}
+                          `}
+                          onClick={() => setShowPortalsMenu(false)}
+                        >
+                          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${portal.color} flex items-center justify-center`}>
+                            <Icon className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900 dark:text-white">{portal.label}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {portal.label === 'Environmental' && 'Impact & Sustainability'}
+                              {portal.label === 'Medical' && 'Quantum Genomics'}
+                              {portal.label === 'Legal' && 'Compliance & Risk'}
+                              {portal.label === 'Military' && 'Defense Operations'}
+                              {portal.label === 'Enterprise' && 'Business Analytics'}
+                            </div>
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+
             {navLinks.map((link) => {
               const Icon = link.icon
               return (
@@ -185,6 +254,38 @@ export function Navigation() {
         {isOpen && (
           <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-800">
             <div className="flex flex-col gap-1">
+              {/* Portals Section in Mobile */}
+              <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                Enterprise Portals
+              </div>
+              {portalLinks.map((portal) => {
+                const Icon = portal.icon
+                return (
+                  <Link
+                    key={portal.href}
+                    href={portal.href}
+                    className={`
+                      flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium
+                      transition-all duration-200
+                      ${
+                        isActive(portal.href)
+                          ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:text-purple-300'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      }
+                    `}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${portal.color} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span>{portal.label}</span>
+                  </Link>
+                )
+              })}
+
+              <div className="px-4 py-2 mt-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                Navigation
+              </div>
               {navLinks.map((link) => {
                 const Icon = link.icon
                 return (

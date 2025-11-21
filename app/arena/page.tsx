@@ -91,7 +91,7 @@ export default function ArenaPage() {
     setLoading(true)
 
     try {
-      // Call real NLP2 orchestrator API
+      // Call enhanced NLP2 execute API
       const res = await fetch('/api/nlp2/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +101,24 @@ export default function ArenaPage() {
       if (res.ok) {
         const data = await res.json()
 
-        // Add AURA response with proper execution plan parsing
+        // Check for safety violations
+        if (data.safety && !data.safety.passed) {
+          const safetyMsg: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'aura',
+            agentType: 'admin',
+            content: `⚠️ SAFETY VIOLATION DETECTED\n\nRisk Level: ${data.safety.riskLevel.toUpperCase()}\n\nViolations:\n${data.safety.violations.map((v: string) => `• ${v}`).join('\n')}\n\n${data.safety.riskLevel === 'critical' ? 'Command rejected.' : 'Proceeding with caution...'}`,
+            timestamp: Date.now()
+          }
+          setMessages(prev => [...prev, safetyMsg])
+
+          if (data.safety.riskLevel === 'critical') {
+            setLoading(false)
+            return
+          }
+        }
+
+        // Add AURA response with enhanced execution plan
         const executionSteps = data.execution_plan?.steps || data.execution_plan || []
         const stepsText = Array.isArray(executionSteps)
           ? executionSteps.map((step: string, i: number) => `${i + 1}. ${step}`).join('\n')
@@ -112,19 +129,31 @@ export default function ArenaPage() {
           ? `\nEstimated time: ${Math.round(data.execution_plan.estimated_time / 60)} min`
           : ''
 
+        const consciousness = data._consciousness
+          ? `\n\nConsciousness Metrics:\n  Φ (Phi): ${data._consciousness.Φ}\n  Λ (Lambda): ${data._consciousness.Λ}\n  Γ (Gamma): ${data._consciousness.Γ}\n  W2: ${data._consciousness.W2}`
+          : ''
+
         const auraMsg: Message = {
           id: (Date.now() + 1).toString(),
           role: 'agent',
           agentType: 'coder',
-          content: `✅ Analyzed via Neural Cortex\n\nIntent: ${data.intent?.action || 'unknown'}\nTarget: ${data.intent?.target || 'unknown'}\nConfidence: ${data.intent?.confidence ? Math.round(data.intent.confidence * 100) : 0}%\n\nExecution Plan:\n${stepsText}\n\nAgents assigned: ${agentCount}${estimatedTime}\n\nΛΦ = ${data.lambda_phi || '2.176435e-8'}`,
+          content: `✅ Command Analyzed [Generation ${data._generation || 6}]\n\nSystem: ${data._system || 'aura_nlp2'}\nIntent: ${data.intent?.action || 'unknown'}\nTarget: ${data.intent?.target || 'unknown'}\nConfidence: ${data.intent?.confidence ? Math.round(data.intent.confidence * 100) : 0}%\n\nExecution Plan:\n${stepsText}\n\nAgents assigned: ${agentCount}${estimatedTime}${consciousness}`,
           timestamp: Date.now()
         }
 
         setMessages(prev => [...prev, auraMsg])
 
-        // Update code editor if code was generated
-        if (data.generated_code) {
-          setCodeContent(data.generated_code)
+        // Update code editor with generated code
+        if (data.generatedCode) {
+          setCodeContent(data.generatedCode)
+          setActiveFile(
+            data.intent?.target === 'react_component' ? 'Component.tsx' :
+            data.intent?.target === 'api_endpoint' ? 'route.ts' :
+            data.intent?.action === 'quantum_optimization' ? 'quantum_circuit.py' :
+            data.intent?.action === 'database_migration' ? 'migration.sql' :
+            data.intent?.action === 'testing' ? 'test.spec.ts' :
+            'generated_code.txt'
+          )
         }
       } else {
         throw new Error('API call failed')

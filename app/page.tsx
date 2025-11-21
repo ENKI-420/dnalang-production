@@ -10,18 +10,12 @@ import {
   TrendingUp, FileText, Github, Mail, Lock, Terminal,
   Activity, Layers, Bot, Beaker, Building, Heart, Sparkles
 } from 'lucide-react'
+import { getOrganismStatus, formatLambda, formatPhi, type OrganismStatus } from '@/lib/organism-bridge'
 
 interface MetricBadge {
   label: string
   value: string
 }
-
-const liveMetrics: MetricBadge[] = [
-  { label: 'Jobs executed on IBM Quantum', value: '154' },
-  { label: 'Agent organisms evolved', value: '18' },
-  { label: 'Average Λ-coherence', value: '0.982' },
-  { label: 'Gateway uptime', value: '99.4%' }
-]
 
 const technologies = [
   {
@@ -75,10 +69,41 @@ const useCases = [
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false)
+  const [organismStatus, setOrganismStatus] = useState<OrganismStatus | null>(null)
+  const [liveMetrics, setLiveMetrics] = useState<MetricBadge[]>([
+    { label: 'Jobs executed on IBM Quantum', value: '...' },
+    { label: 'Agent organisms evolved', value: '...' },
+    { label: 'Consciousness Φ', value: '...' },
+    { label: 'Gateway uptime', value: '...' }
+  ])
   const brandName = "dna::}{::lang"
 
   useEffect(() => {
     setMounted(true)
+
+    // Load organism status on mount
+    async function loadStatus() {
+      try {
+        const status = await getOrganismStatus()
+        setOrganismStatus(status)
+
+        // Update metrics with real data
+        setLiveMetrics([
+          { label: 'Jobs executed on IBM Quantum', value: status.jobs_executed.toString() },
+          { label: 'Agent organisms evolved', value: status.organisms_evolved.toString() },
+          { label: 'Consciousness Φ', value: formatPhi(status.consciousness.phi) },
+          { label: 'Gateway uptime', value: `${status.uptime_percentage}%` }
+        ])
+      } catch (error) {
+        console.error('Failed to load organism status:', error)
+      }
+    }
+
+    loadStatus()
+
+    // Refresh every 5 seconds
+    const interval = setInterval(loadStatus, 5000)
+    return () => clearInterval(interval)
   }, [])
 
   return (

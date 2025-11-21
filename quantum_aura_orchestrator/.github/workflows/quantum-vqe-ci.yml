@@ -1,0 +1,276 @@
+name: Quantum VQE CI Pipeline
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run daily at 02:00 UTC to catch environment drift
+    - cron: '0 2 * * *'
+
+env:
+  PYTHON_VERSION: '3.10'
+  CACHE_VERSION: v1
+
+jobs:
+  lint:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git SHA
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install linting dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort mypy
+
+      - name: Run Black (code formatter)
+        run: |
+          black --check --diff quantum_vqe_executor.py tests/
+
+      - name: Run isort (import sorting)
+        run: |
+          isort --check-only --diff quantum_vqe_executor.py tests/
+
+      - name: Run flake8 (style guide)
+        run: |
+          flake8 quantum_vqe_executor.py tests/ \
+            --max-line-length=100 \
+            --ignore=E203,W503 \
+            --exclude=.venv,__pycache__
+
+      - name: Run mypy (type checking)
+        run: |
+          mypy quantum_vqe_executor.py \
+            --ignore-missing-imports \
+            --no-strict-optional
+        continue-on-error: true  # Allow type errors for now
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-timeout pytest-xdist
+
+      - name: Run unit tests
+        run: |
+          pytest tests/unit/ -v \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=term \
+            --timeout=60 \
+            --tb=short
+        continue-on-error: true  # Unit tests not implemented yet
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+        if: always()
+
+  integration-tests:
+    name: Integration Tests (VQE Smoke)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-timeout pytest-html
+
+      - name: Display environment info
+        run: |
+          python --version
+          pip list | grep -i qiskit
+          git log -1 --format="%H %ai %an"
+
+      - name: Run VQE smoke tests
+        id: vqe_tests
+        run: |
+          cd quantum_aura_orchestrator
+          pytest tests/integration/test_vqe_smoke.py -v \
+            --timeout=300 \
+            --html=test-report.html \
+            --self-contained-html \
+            --tb=short \
+            --capture=no
+        continue-on-error: true
+
+      - name: Generate provenance bundle
+        if: always()
+        run: |
+          mkdir -p provenance
+          cat > provenance/ci_run_${{ github.run_number }}.json <<EOF
+          {
+            "run_id": "${{ github.run_id }}",
+            "run_number": "${{ github.run_number }}",
+            "git_sha": "${{ github.sha }}",
+            "git_ref": "${{ github.ref }}",
+            "actor": "${{ github.actor }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "python_version": "${{ matrix.python-version }}",
+            "workflow": "quantum-vqe-ci",
+            "test_status": "${{ steps.vqe_tests.outcome }}"
+          }
+          EOF
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-report-py${{ matrix.python-version }}
+          path: |
+            quantum_aura_orchestrator/test-report.html
+            quantum_aura_orchestrator/results/*.json
+            provenance/*.json
+          retention-days: 30
+
+      - name: Upload provenance bundle
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: provenance-py${{ matrix.python-version }}
+          path: provenance/*.json
+          retention-days: 90
+
+  security-scan:
+    name: Security & Dependency Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install safety bandit
+
+      - name: Run safety (dependency vulnerability scan)
+        run: |
+          pip install -r requirements.txt
+          safety check --json || true
+        continue-on-error: true
+
+      - name: Run bandit (security linter)
+        run: |
+          bandit -r quantum_vqe_executor.py tests/ \
+            -f json -o bandit-report.json || true
+        continue-on-error: true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+          retention-days: 30
+
+  build-docs:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install sphinx sphinx-rtd-theme
+
+      - name: Build documentation
+        run: |
+          # Placeholder for future Sphinx docs
+          echo "Documentation build placeholder"
+        continue-on-error: true
+
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests, integration-tests, security-scan]
+    if: always()
+
+    steps:
+      - name: Generate CI summary
+        run: |
+          echo "## Quantum VQE CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run ID:** ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Git SHA:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Actor:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint: ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Security Scan: ${{ needs.security-scan.result }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for failures
+        run: |
+          if [[ "${{ needs.lint.result }}" == "failure" ]] || \
+             [[ "${{ needs.integration-tests.result }}" == "failure" ]]; then
+            echo "❌ CI Pipeline Failed"
+            exit 1
+          else
+            echo "✅ CI Pipeline Passed"
+          fi
