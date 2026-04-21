@@ -4,4 +4,4 @@ pydantic[email]==2.5.0
 httpx==0.25.1
 PyJWT==2.8.0
 asyncpg==0.29.0
-python-dotenv==1.0.0
+python-dotenv==1.2.2
